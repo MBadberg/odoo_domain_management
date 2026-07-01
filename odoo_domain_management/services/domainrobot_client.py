@@ -220,12 +220,6 @@ class DomainrobotClient:
         # Encode command as POST body
         body = urllib.parse.urlencode(command).encode('utf-8')
 
-        _logger.debug(
-            'Domainrobot API call: command=%s url=%s',
-            command.get('command'),
-            self.api_url,  # never log credentials
-        )
-
         try:
             # Allow self-signed certs in sandbox environments
             ctx = ssl.create_default_context()
