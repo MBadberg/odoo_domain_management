@@ -118,21 +118,18 @@
                 <field name="partner_id"/>
                 <field name="state"/>
                 <field name="availability"/>
-                <separator/>
                 <filter string="Available" name="available"
                         domain="[('availability', '=', 'available')]"/>
                 <filter string="Registered" name="registered"
                         domain="[('state', '=', 'registered')]"/>
                 <filter string="Failed" name="failed"
                         domain="[('state', '=', 'failed')]"/>
-                <group expand="0" string="Group By">
-                    <filter string="Status" name="group_state"
-                            context="{'group_by': 'state'}"/>
-                    <filter string="TLD" name="group_tld"
-                            context="{'group_by': 'tld'}"/>
-                    <filter string="Customer" name="group_partner"
-                            context="{'group_by': 'partner_id'}"/>
-                </group>
+                <filter string="Group by Status" name="group_state"
+                        context="{'group_by': 'state'}"/>
+                <filter string="Group by TLD" name="group_tld"
+                        context="{'group_by': 'tld'}"/>
+                <filter string="Group by Customer" name="group_partner"
+                        context="{'group_by': 'partner_id'}"/>
             </search>
         </field>
     </record>
