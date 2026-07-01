@@ -12,7 +12,7 @@
 # Example:
 # for asset in model.search([('status', '=', 'active')]):
 #     asset.action_sync_status()
-env['domain.asset'].search([]).action_sync_status()
+env['domain.asset'].search([('status', '=', 'active')]).action_sync_status()
             </field>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>

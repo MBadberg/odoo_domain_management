@@ -18,6 +18,7 @@ Features (MVP):
     'website': '',
     'depends': [
         'base',
+        'base_setup',
         'mail',
         'portal',
         'website',

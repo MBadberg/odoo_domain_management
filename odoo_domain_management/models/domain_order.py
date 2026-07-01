@@ -202,7 +202,7 @@ class DomainOrder(models.Model):
             self.write({
                 'state': 'registered',
                 'date_registered': now,
-                'external_order_id': result.get('external_id', ''),
+                'external_order_id': result.get('properties', {}).get('EXTERNAL_ORDER_ID', [''])[0],
             })
             # Create or update the linked domain asset
             self._create_or_update_asset()

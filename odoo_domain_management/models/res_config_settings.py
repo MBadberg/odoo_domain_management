@@ -22,6 +22,7 @@ class ResConfigSettings(models.TransientModel):
     )
     domainrobot_api_password = fields.Char(
         string='API Password (s_pw)',
+        ******
         config_parameter='domainrobot.api_password',
         help='Password / token for the Domainrobot API. Stored as a system parameter.',
     )

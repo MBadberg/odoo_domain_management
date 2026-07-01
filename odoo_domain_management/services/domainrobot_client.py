@@ -235,11 +235,12 @@ class DomainrobotClient:
             with urllib.request.urlopen(req, timeout=self.timeout, context=ctx) as resp:
                 raw = resp.read().decode('utf-8', errors='replace')
         except urllib.error.URLError as exc:
-            _logger.error('Domainrobot API connection error: %s', exc)
-            raise DomainrobotAPIError('999', f'Connection error: {exc}') from exc
+            reason = exc.reason if hasattr(exc, 'reason') and exc.reason else exc
+            _logger.error('Domainrobot API connection error: %s', reason)
+            raise DomainrobotAPIError('999', f'Connection error: {reason}') from exc
         except Exception as exc:  # pylint: disable=broad-except
-            _logger.error('Domainrobot API unexpected error: %s', exc)
-            raise DomainrobotAPIError('998', f'Unexpected error: {exc}') from exc
+            _logger.error('Domainrobot API unexpected error: %s', type(exc).__name__)
+            raise DomainrobotAPIError('998', f'Unexpected error: {type(exc).__name__}') from exc
 
         result = self._parse_response(raw)
         _logger.debug(

@@ -106,7 +106,7 @@ class DomainAsset(models.Model):
     days_until_expiry = fields.Integer(
         string='Days Until Expiry',
         compute='_compute_days_until_expiry',
-        store=False,
+        store=True,
     )
 
     @api.depends('date_expiry')

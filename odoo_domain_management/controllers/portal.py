@@ -128,7 +128,7 @@ class DomainPortalController(CustomerPortal):
                                 'status': status,
                             })
                     else:
-                        error = f"API error {api_result.get('code')}: {api_result.get('description')}"
+                        error = _('API error %s: %s') % (api_result.get('code'), api_result.get('description'))
                 else:
                     # Single domain check – domain_name may already contain TLD
                     api_result = client.check_domain(domain_name)
