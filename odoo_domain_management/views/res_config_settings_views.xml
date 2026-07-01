@@ -6,63 +6,27 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="base.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[hasclass('settings')]" position="before">
-                <div class="app_settings_block" data-string="Domain Management"
-                     id="domain_management_settings" data-key="odoo_domain_management">
-                    <h2>Domain Management – Domainrobot API</h2>
-                    <div class="row mt16 o_settings_container">
-                        <div class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane"/>
-                            <div class="o_setting_right_pane">
-                                <span class="o_form_label">API Endpoint URL</span>
-                                <div class="text-muted">
-                                    Base URL for the Domainrobot API (sandbox and production use the
-                                    same URL – credentials differ).
-                                </div>
-                                <div class="content-group mt8">
-                                    <field name="domainrobot_api_url"
-                                           placeholder="https://api.domainreselling.de/api/call.cgi"/>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane"/>
-                            <div class="o_setting_right_pane">
-                                <span class="o_form_label">API Credentials</span>
-                                <div class="text-muted">
-                                    Enter your reseller login (s_login) and password (s_pw).
-                                </div>
-                                <div class="content-group mt8">
-                                    <div class="row">
-                                        <label class="col-lg-4 o_form_label" for="domainrobot_api_user">Username</label>
-                                        <field name="domainrobot_api_user"
-                                               class="col-lg-8"
-                                               placeholder="s_login"/>
-                                    </div>
-                                    <div class="row mt4">
-                                        <label class="col-lg-4 o_form_label" for="domainrobot_api_password">Password</label>
-                                        <field name="domainrobot_api_password"
-                                               class="col-lg-8"
-                                               placeholder="s_pw"/>
-                                    </div>
-                                    <div class="row mt4">
-                                        <label class="col-lg-4 o_form_label" for="domainrobot_api_timeout">Timeout (s)</label>
-                                        <field name="domainrobot_api_timeout" class="col-lg-8"/>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <xpath expr="//form" position="inside">
+                <app string="Domain Management" name="odoo_domain_management">
+                    <block title="Domainrobot API">
+                        <setting id="domainrobot_api_url_setting" string="API Endpoint URL"
+                                 help="Base URL for the Domainrobot API (sandbox and production use the same URL; credentials differ).">
+                            <field name="domainrobot_api_url"
+                                   placeholder="https://api.domainreselling.de/api/call.cgi"/>
+                        </setting>
+                        <setting id="domainrobot_api_user_setting" string="API Username (s_login)">
+                            <field name="domainrobot_api_user" placeholder="s_login"/>
+                        </setting>
+                        <setting id="domainrobot_api_password_setting" string="API Password (s_pw)">
+                            <field name="domainrobot_api_password" placeholder="s_pw"/>
+                        </setting>
+                        <setting id="domainrobot_api_timeout_setting" string="API Timeout (seconds)">
+                            <field name="domainrobot_api_timeout"/>
+                        </setting>
+                    </block>
+                </app>
             </xpath>
         </field>
     </record>
-
-    <!-- Quick-access menu item under Settings -->
-    <menuitem id="menu_domain_settings"
-              name="Domain Management"
-              parent="menu_domain_root"
-              action="base.action_res_config_settings"
-              sequence="99"/>
 
 </odoo>
