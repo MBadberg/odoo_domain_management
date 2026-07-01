@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ Actions ══════════════════════════════════════════════════════════ -->
+
+    <record id="action_domain_asset" model="ir.actions.act_window">
+        <field name="name">Managed Domains</field>
+        <field name="res_model">domain.asset</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ══ List view ════════════════════════════════════════════════════════ -->
+
+    <record id="view_domain_asset_list" model="ir.ui.view">
+        <field name="name">domain.asset.list</field>
+        <field name="model">domain.asset</field>
+        <field name="arch" type="xml">
+            <list string="Managed Domains"
+                  decoration-danger="status == 'expired'"
+                  decoration-muted="status == 'cancelled'">
+                <field name="name"/>
+                <field name="tld"/>
+                <field name="partner_id"/>
+                <field name="registrar"/>
+                <field name="date_registration"/>
+                <field name="date_expiry"/>
+                <field name="days_until_expiry" string="Days Left"/>
+                <field name="status" widget="badge"
+                       decoration-success="status == 'active'"
+                       decoration-danger="status == 'expired'"
+                       decoration-warning="status == 'pending_transfer'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Form view ════════════════════════════════════════════════════════ -->
+
+    <record id="view_domain_asset_form" model="ir.ui.view">
+        <field name="name">domain.asset.form</field>
+        <field name="model">domain.asset</field>
+        <field name="arch" type="xml">
+            <form string="Managed Domain">
+                <header>
+                    <button name="action_sync_status" type="object"
+                            string="Sync Status from API"
+                            class="btn-secondary"/>
+                    <field name="status" widget="statusbar"
+                           statusbar_visible="active,expired,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. example.de"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Domain">
+                            <field name="name"/>
+                            <field name="tld"/>
+                            <field name="registrar"/>
+                            <field name="external_domain_id"/>
+                        </group>
+                        <group string="Owner">
+                            <field name="partner_id"/>
+                            <field name="user_id"/>
+                            <field name="order_id"/>
+                        </group>
+                    </group>
+                    <group string="Dates">
+                        <field name="date_registration"/>
+                        <field name="date_expiry"/>
+                        <field name="days_until_expiry"/>
+                    </group>
+                    <group string="Nameservers">
+                        <field name="nameserver0"/>
+                        <field name="nameserver1"/>
+                        <field name="nameserver2"/>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" nolabel="1"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ Search view ══════════════════════════════════════════════════════ -->
+
+    <record id="view_domain_asset_search" model="ir.ui.view">
+        <field name="name">domain.asset.search</field>
+        <field name="model">domain.asset</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Domain Name"/>
+                <field name="partner_id" string="Customer"/>
+                <filter name="active" string="Active"
+                        domain="[('status', '=', 'active')]"/>
+                <filter name="expiring_soon" string="Expiring (30 days)"
+                        domain="[('days_until_expiry', '&lt;=', 30), ('days_until_expiry', '&gt;=', 0)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_status" string="Status"
+                            context="{'group_by': 'status'}"/>
+                    <filter name="group_tld" string="TLD"
+                            context="{'group_by': 'tld'}"/>
+                    <filter name="group_partner" string="Customer"
+                            context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══ Menu ═════════════════════════════════════════════════════════════ -->
+
+    <menuitem id="menu_domain_assets" name="Managed Domains"
+              parent="menu_domain_root"
+              action="action_domain_asset"
+              sequence="20"/>
+
+</odoo>

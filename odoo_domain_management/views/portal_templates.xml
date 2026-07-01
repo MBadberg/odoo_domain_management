@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ Portal home – "My Domains" counter ══════════════════════════════ -->
+
+    <template id="portal_my_home_menu_domains" name="Portal layout: My Domains"
+              inherit_id="portal.portal_my_home" priority="30">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">My Domains</t>
+                <t t-set="url">/my/domains</t>
+                <t t-set="placeholder_count">domain_count</t>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- ══ "My Domains" list page ══════════════════════════════════════════ -->
+
+    <template id="portal_my_domains" name="My Domains">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Domains</t>
+            </t>
+            <t t-if="not domains">
+                <div class="alert alert-info text-center" role="alert">
+                    You don't have any registered domains yet.
+                    <a href="/my/domains/check" class="alert-link">Check domain availability</a>.
+                </div>
+            </t>
+            <t t-if="domains">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">My Domains</h5>
+                        <a href="/my/domains/check" class="btn btn-sm btn-primary">
+                            + Register New Domain
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover o_portal_my_doc_table mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Domain Name</th>
+                                    <th>TLD</th>
+                                    <th>Status</th>
+                                    <th>Expiry</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="domains" t-as="domain">
+                                    <td>
+                                        <a t-attf-href="/my/domains/#{domain.id}">
+                                            <t t-esc="domain.name"/>
+                                        </a>
+                                    </td>
+                                    <td><t t-esc="domain.tld or '-'"/></td>
+                                    <td>
+                                        <span t-attf-class="badge #{
+                                            'bg-success' if domain.status == 'active'
+                                            else 'bg-danger' if domain.status == 'expired'
+                                            else 'bg-warning text-dark'}">
+                                            <t t-esc="domain.status.replace('_', ' ').title()"/>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <t t-if="domain.date_expiry">
+                                            <t t-esc="domain.date_expiry"/>
+                                            <t t-if="domain.days_until_expiry &lt;= 30 and domain.days_until_expiry &gt;= 0">
+                                                <span class="badge bg-warning text-dark ms-1">
+                                                    Expires in <t t-esc="domain.days_until_expiry"/> days
+                                                </span>
+                                            </t>
+                                        </t>
+                                        <t t-else="">–</t>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <t t-call="portal.portal_pager"/>
+            </t>
+        </t>
+    </template>
+
+    <!-- ══ Domain detail page ═══════════════════════════════════════════════ -->
+
+    <template id="portal_domain_detail" name="Domain Detail">
+        <t t-call="portal.portal_layout">
+            <t t-set="o_portal_fullwidth_alert" t-value="False"/>
+            <div class="container mt-4">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4 class="mb-0">
+                                    <i class="fa fa-globe me-2"/>
+                                    <t t-esc="domain.name"/>
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Status</dt>
+                                    <dd class="col-sm-8">
+                                        <span t-attf-class="badge #{
+                                            'bg-success' if domain.status == 'active'
+                                            else 'bg-danger' if domain.status == 'expired'
+                                            else 'bg-warning text-dark'}">
+                                            <t t-esc="domain.status.replace('_', ' ').title()"/>
+                                        </span>
+                                    </dd>
+                                    <dt class="col-sm-4">Registrar</dt>
+                                    <dd class="col-sm-8"><t t-esc="domain.registrar or '–'"/></dd>
+                                    <dt class="col-sm-4">Registration Date</dt>
+                                    <dd class="col-sm-8"><t t-esc="domain.date_registration or '–'"/></dd>
+                                    <dt class="col-sm-4">Expiry Date</dt>
+                                    <dd class="col-sm-8"><t t-esc="domain.date_expiry or '–'"/></dd>
+                                    <t t-if="domain.nameserver0">
+                                        <dt class="col-sm-4">Nameserver 1</dt>
+                                        <dd class="col-sm-8"><t t-esc="domain.nameserver0"/></dd>
+                                    </t>
+                                    <t t-if="domain.nameserver1">
+                                        <dt class="col-sm-4">Nameserver 2</dt>
+                                        <dd class="col-sm-8"><t t-esc="domain.nameserver1"/></dd>
+                                    </t>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header"><strong>Actions</strong></div>
+                            <div class="card-body d-grid gap-2">
+                                <a href="/my/domains" class="btn btn-outline-secondary">
+                                    ← Back to My Domains
+                                </a>
+                                <a href="/my/domains/check" class="btn btn-outline-primary">
+                                    Register Another Domain
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ══ Availability check form ══════════════════════════════════════════ -->
+
+    <template id="portal_check_domain" name="Check Domain Availability">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <h2 class="mb-4">
+                    <i class="fa fa-search me-2"/>Check Domain Availability
+                </h2>
+
+                <!-- Error message -->
+                <t t-if="error">
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fa fa-exclamation-circle me-1"/>
+                        <t t-esc="error"/>
+                    </div>
+                </t>
+
+                <!-- Availability check form -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form method="POST" action="/my/domains/check">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-5">
+                                    <label class="form-label" for="domain_name">Domain Name</label>
+                                    <input type="text" class="form-control" id="domain_name"
+                                           name="domain_name"
+                                           t-att-value="domain_name or ''"
+                                           placeholder="e.g. mycompany"
+                                           required="required"/>
+                                    <div class="form-text">Enter the name without the TLD extension.</div>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label">TLDs to check</label>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <t t-foreach="tlds" t-as="tld">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input tld-check"
+                                                       type="checkbox"
+                                                       t-att-id="'tld_' + tld"
+                                                       t-att-value="tld"
+                                                       checked="checked"/>
+                                                <label class="form-check-label"
+                                                       t-att-for="'tld_' + tld">
+                                                    .<t t-esc="tld"/>
+                                                </label>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <!-- Hidden field collecting selected TLDs as comma-separated list -->
+                                    <input type="hidden" name="tlds" id="tlds_hidden"/>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fa fa-search me-1"/>Check
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results table -->
+                <t t-if="results">
+                    <div class="card">
+                        <div class="card-header"><strong>Results</strong></div>
+                        <table class="table mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Domain</th>
+                                    <th>Availability</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="results" t-as="result">
+                                    <td><strong><t t-esc="result['domain']"/></strong></td>
+                                    <td>
+                                        <t t-if="result['available']">
+                                            <span class="badge bg-success">
+                                                <i class="fa fa-check me-1"/>Available
+                                            </span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="badge bg-secondary">
+                                                <i class="fa fa-times me-1"/>Unavailable
+                                            </span>
+                                        </t>
+                                    </td>
+                                    <td>
+                                        <t t-if="result['available']">
+                                            <form method="POST" action="/my/domains/purchase"
+                                                  style="display:inline">
+                                                <input type="hidden" name="csrf_token"
+                                                       t-att-value="request.csrf_token()"/>
+                                                <input type="hidden" name="domain_name"
+                                                       t-att-value="result['domain']"/>
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="fa fa-shopping-cart me-1"/>Register
+                                                </button>
+                                            </form>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </div>
+
+            <!-- JS to collect checked TLDs into hidden field before submit -->
+            <script type="text/javascript">
+                document.addEventListener('DOMContentLoaded', function () {
+                    var form = document.querySelector('form[action="/my/domains/check"]');
+                    if (form) {
+                        form.addEventListener('submit', function () {
+                            var checked = Array.from(
+                                document.querySelectorAll('.tld-check:checked')
+                            ).map(function (cb) { return cb.value; });
+                            document.getElementById('tlds_hidden').value = checked.join(',');
+                        });
+                    }
+                });
+            </script>
+        </t>
+    </template>
+
+    <!-- ══ Purchase result page ═════════════════════════════════════════════ -->
+
+    <template id="portal_purchase_result" name="Domain Purchase Result">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <h2 class="mb-4">
+                    <i class="fa fa-globe me-2"/>Domain Registration
+                </h2>
+
+                <t t-if="error">
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fa fa-exclamation-circle me-1"/>
+                        <strong>Registration failed:</strong>
+                        <t t-esc="error"/>
+                    </div>
+                </t>
+
+                <t t-if="success">
+                    <div class="alert alert-success" role="alert">
+                        <i class="fa fa-check-circle me-1"/>
+                        <t t-esc="success"/>
+                    </div>
+                </t>
+
+                <div class="d-flex gap-2 mt-3">
+                    <a href="/my/domains" class="btn btn-outline-secondary">
+                        ← My Domains
+                    </a>
+                    <a href="/my/domains/check" class="btn btn-outline-primary">
+                        Check Another Domain
+                    </a>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

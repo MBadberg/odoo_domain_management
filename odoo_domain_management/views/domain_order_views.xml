@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ Actions ══════════════════════════════════════════════════════════ -->
+
+    <record id="action_domain_order" model="ir.actions.act_window">
+        <field name="name">Domain Orders</field>
+        <field name="res_model">domain.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_state': 'draft'}</field>
+    </record>
+
+    <!-- ══ List view ════════════════════════════════════════════════════════ -->
+
+    <record id="view_domain_order_list" model="ir.ui.view">
+        <field name="name">domain.order.list</field>
+        <field name="model">domain.order</field>
+        <field name="arch" type="xml">
+            <list string="Domain Orders" decoration-success="state == 'registered'"
+                  decoration-danger="state == 'failed'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="tld"/>
+                <field name="partner_id"/>
+                <field name="period"/>
+                <field name="availability"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'registered'"
+                       decoration-warning="state == 'pending'"
+                       decoration-danger="state == 'failed'"/>
+                <field name="date_order"/>
+                <field name="date_registered"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Form view ════════════════════════════════════════════════════════ -->
+
+    <record id="view_domain_order_form" model="ir.ui.view">
+        <field name="name">domain.order.form</field>
+        <field name="model">domain.order</field>
+        <field name="arch" type="xml">
+            <form string="Domain Order">
+                <header>
+                    <button name="action_check_availability" type="object"
+                            string="Check Availability"
+                            class="btn-secondary"
+                            invisible="state not in ['draft']"/>
+                    <button name="action_purchase" type="object"
+                            string="Register Domain"
+                            class="btn-primary"
+                            invisible="availability != 'available' or state not in ['availability_checked']"/>
+                    <button name="action_sync_status" type="object"
+                            string="Sync Status"
+                            class="btn-secondary"
+                            invisible="state != 'registered'"/>
+                    <button name="action_cancel" type="object"
+                            string="Cancel"
+                            class="btn-secondary"
+                            invisible="state in ['registered', 'cancelled']"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,availability_checked,pending,registered"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. example.de"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Domain">
+                            <field name="name"/>
+                            <field name="tld"/>
+                            <field name="period"/>
+                            <field name="availability"/>
+                            <field name="date_order"/>
+                            <field name="date_registered"/>
+                        </group>
+                        <group string="Customer">
+                            <field name="partner_id"/>
+                            <field name="user_id"/>
+                            <field name="asset_id"/>
+                        </group>
+                    </group>
+                    <group string="Nameservers">
+                        <field name="nameserver0"/>
+                        <field name="nameserver1"/>
+                    </group>
+                    <group string="Contact Handles (Domainrobot)">
+                        <field name="owner_contact"/>
+                        <field name="admin_contact"/>
+                        <field name="tech_contact"/>
+                        <field name="billing_contact"/>
+                    </group>
+                    <group string="API Response">
+                        <field name="api_response_code"/>
+                        <field name="api_response_message"/>
+                        <field name="external_order_id"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ Search view ══════════════════════════════════════════════════════ -->
+
+    <record id="view_domain_order_search" model="ir.ui.view">
+        <field name="name">domain.order.search</field>
+        <field name="model">domain.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Domain Name"/>
+                <field name="partner_id" string="Customer"/>
+                <filter name="available" string="Available"
+                        domain="[('availability', '=', 'available')]"/>
+                <filter name="registered" string="Registered"
+                        domain="[('state', '=', 'registered')]"/>
+                <filter name="failed" string="Failed"
+                        domain="[('state', '=', 'failed')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="group_tld" string="TLD"
+                            context="{'group_by': 'tld'}"/>
+                    <filter name="group_partner" string="Customer"
+                            context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══ Menu ═════════════════════════════════════════════════════════════ -->
+
+    <menuitem id="menu_domain_root" name="Domains" sequence="50"/>
+
+    <menuitem id="menu_domain_orders" name="Domain Orders"
+              parent="menu_domain_root"
+              action="action_domain_order"
+              sequence="10"/>
+
+</odoo>
