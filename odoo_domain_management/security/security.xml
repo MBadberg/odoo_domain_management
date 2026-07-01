@@ -4,10 +4,9 @@
 
         <!-- ══ Groups ══════════════════════════════════════════════════════ -->
 
-        <record id="group_domain_manager" model="res.groups">
-            <field name="name">Domain Manager</field>
-            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
-        </record>
+        <!-- No custom group is required for this module; the existing core groups
+             (base.group_user and base.group_portal) are sufficient for the access
+             rules and record rules defined below. -->
 
         <!-- ══ Record rules ════════════════════════════════════════════════ -->
 
