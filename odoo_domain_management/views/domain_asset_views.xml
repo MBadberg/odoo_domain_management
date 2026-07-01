@@ -95,19 +95,21 @@
         <field name="name">domain.asset.search</field>
         <field name="model">domain.asset</field>
         <field name="arch" type="xml">
-            <search>
-                <field name="name" string="Domain Name"/>
-                <field name="partner_id" string="Customer"/>
-                <filter name="active" string="Active"
+            <search string="Search Managed Domains">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="status"/>
+                <separator/>
+                <filter string="Active" name="active"
                         domain="[('status', '=', 'active')]"/>
-                <filter name="expiring_soon" string="Expiring (30 days)"
+                <filter string="Expiring (30 days)" name="expiring_soon"
                         domain="[('days_until_expiry', '&lt;=', 30), ('days_until_expiry', '&gt;=', 0)]"/>
                 <group expand="0" string="Group By">
-                    <filter name="group_status" string="Status"
+                    <filter string="Status" name="group_status"
                             context="{'group_by': 'status'}"/>
-                    <filter name="group_tld" string="TLD"
+                    <filter string="TLD" name="group_tld"
                             context="{'group_by': 'tld'}"/>
-                    <filter name="group_partner" string="Customer"
+                    <filter string="Customer" name="group_partner"
                             context="{'group_by': 'partner_id'}"/>
                 </group>
             </search>

@@ -113,21 +113,24 @@
         <field name="name">domain.order.search</field>
         <field name="model">domain.order</field>
         <field name="arch" type="xml">
-            <search>
-                <field name="name" string="Domain Name"/>
-                <field name="partner_id" string="Customer"/>
-                <filter name="available" string="Available"
+            <search string="Search Domain Orders">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="state"/>
+                <field name="availability"/>
+                <separator/>
+                <filter string="Available" name="available"
                         domain="[('availability', '=', 'available')]"/>
-                <filter name="registered" string="Registered"
+                <filter string="Registered" name="registered"
                         domain="[('state', '=', 'registered')]"/>
-                <filter name="failed" string="Failed"
+                <filter string="Failed" name="failed"
                         domain="[('state', '=', 'failed')]"/>
                 <group expand="0" string="Group By">
-                    <filter name="group_state" string="Status"
+                    <filter string="Status" name="group_state"
                             context="{'group_by': 'state'}"/>
-                    <filter name="group_tld" string="TLD"
+                    <filter string="TLD" name="group_tld"
                             context="{'group_by': 'tld'}"/>
-                    <filter name="group_partner" string="Customer"
+                    <filter string="Customer" name="group_partner"
                             context="{'group_by': 'partner_id'}"/>
                 </group>
             </search>
