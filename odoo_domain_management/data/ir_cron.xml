@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Skeleton cron for domain status synchronisation -->
+        <record id="cron_sync_domain_status" model="ir.cron">
+            <field name="name">Domain Management: Sync Domain Status</field>
+            <field name="model_id" ref="model_domain_asset"/>
+            <field name="state">code</field>
+            <field name="code">
+# Sync status for all active domains.
+# TODO: implement status_domain in DomainrobotClient and call it here.
+# Example:
+# for asset in model.search([('status', '=', 'active')]):
+#     asset.action_sync_status()
+env['domain.asset'].search([]).action_sync_status()
+            </field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active">False</field>
+            <field name="user_id" ref="base.user_root"/>
+        </record>
+    </data>
+</odoo>

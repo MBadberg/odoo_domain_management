@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_domain_order_user,domain.order (internal user),model_domain_order,base.group_user,1,1,1,1
+access_domain_order_portal,domain.order (portal),model_domain_order,base.group_portal,1,0,0,0
+access_domain_asset_user,domain.asset (internal user),model_domain_asset,base.group_user,1,1,1,1
+access_domain_asset_portal,domain.asset (portal),model_domain_asset,base.group_portal,1,0,0,0
