@@ -29,11 +29,4 @@
         </field>
     </record>
 
-    <!-- Quick-access menu item under Settings -->
-    <menuitem id="menu_domain_settings"
-              name="Domain Management"
-              parent="menu_domain_root"
-              action="base.action_res_config_settings"
-              sequence="99"/>
-
 </odoo>

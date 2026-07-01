@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
+from odoo import models, fields
 
 
 class ResConfigSettings(models.TransientModel):
@@ -22,7 +22,6 @@ class ResConfigSettings(models.TransientModel):
     )
     domainrobot_api_password = fields.Char(
         string='API Password (s_pw)',
-        password=True,
         config_parameter='domainrobot.api_password',
         help='Password / token for the Domainrobot API. Stored as a system parameter.',
     )
