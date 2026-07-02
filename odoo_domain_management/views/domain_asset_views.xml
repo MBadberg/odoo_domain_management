@@ -66,17 +66,20 @@
                             <field name="order_id"/>
                         </group>
                     </group>
-                    <group string="Dates">
+                    <separator string="Dates"/>
+                    <group>
                         <field name="date_registration"/>
                         <field name="date_expiry"/>
                         <field name="days_until_expiry"/>
                     </group>
-                    <group string="Nameservers">
+                    <separator string="Nameservers"/>
+                    <group>
                         <field name="nameserver0"/>
                         <field name="nameserver1"/>
                         <field name="nameserver2"/>
                     </group>
-                    <group string="Notes">
+                    <separator string="Notes"/>
+                    <group>
                         <field name="notes" nolabel="1"/>
                     </group>
                 </sheet>
