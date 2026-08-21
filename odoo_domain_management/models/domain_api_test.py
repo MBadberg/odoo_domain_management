@@ -55,19 +55,30 @@ class DomainApiTester(models.TransientModel):
             'result_payload': json.dumps(result, indent=2, sort_keys=True, ensure_ascii=False),
         })
 
-        if result.get('code') not in ('200', '210', '211'):
-            raise UserError(_('API call failed: %s - %s') % (
-                result.get('code', 'unknown'),
-                result.get('description', 'No description returned'),
-            ))
-
-        return {
+        action = {
             'type': 'ir.actions.act_window',
             'res_model': self._name,
             'res_id': self.id,
             'view_mode': 'form',
             'target': 'current',
         }
+
+        if result.get('code') not in ('200', '210', '211'):
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('API call failed'),
+                    'message': '%s - %s' % (
+                        result.get('code', 'unknown'),
+                        result.get('description', 'No description returned'),
+                    ),
+                    'type': 'danger',
+                    'next': action,
+                },
+            }
+
+        return action
 
     def action_clear(self):
         self.write({

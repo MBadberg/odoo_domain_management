@@ -23,17 +23,16 @@
                     </div>
                     <group>
                         <field name="command"/>
-                        <field name="domain_name" attrs="{'invisible': [('command', 'not in', ['check_domain', 'status_domain'])]}" placeholder="example.de"/>
-                        <field name="domains" attrs="{'invisible': [('command', '!=', 'check_domains')]}
-                            " placeholder="example.de, example.com, example.org" help="One domain per line or comma-separated."/>
-                        <field name="first_name" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
-                        <field name="last_name" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
-                        <field name="street" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
-                        <field name="zip_code" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
-                        <field name="city" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
-                        <field name="country" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
-                        <field name="email" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
-                        <field name="phone" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
+                        <field name="domain_name" invisible="command not in ['check_domain', 'status_domain']" placeholder="example.de"/>
+                        <field name="domains" invisible="command != 'check_domains'" placeholder="example.de, example.com, example.org" help="One domain per line or comma-separated."/>
+                        <field name="first_name" invisible="command != 'add_contact'"/>
+                        <field name="last_name" invisible="command != 'add_contact'"/>
+                        <field name="street" invisible="command != 'add_contact'"/>
+                        <field name="zip_code" invisible="command != 'add_contact'"/>
+                        <field name="city" invisible="command != 'add_contact'"/>
+                        <field name="country" invisible="command != 'add_contact'"/>
+                        <field name="email" invisible="command != 'add_contact'"/>
+                        <field name="phone" invisible="command != 'add_contact'"/>
                     </group>
                     <separator string="Response"/>
                     <group>
