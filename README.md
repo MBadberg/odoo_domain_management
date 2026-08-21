@@ -90,6 +90,18 @@ Portal customers can see their registered domains at `/my/domains`.
 
 Backend admins can see all managed domains under **Domains → Managed Domains**.
 
+### Test API commands in the backend
+
+Use **Domains → API Test Console** to run manual calls against the Domainrobot API and inspect the raw reply. The tester supports:
+
+- `statusUser`
+- `CheckDomain`
+- `CheckDomains`
+- `StatusDomain`
+- `addcontact`
+
+This is the quick way to verify whether the transferred domains are visible from the API and whether credentials / parameters are still valid.
+
 ---
 
 ## API Client

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_domain_api_test" model="ir.actions.act_window">
+        <field name="name">API Test Console</field>
+        <field name="res_model">domain.api.test</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_domain_api_test_form" model="ir.ui.view">
+        <field name="name">domain.api.test.form</field>
+        <field name="model">domain.api.test</field>
+        <field name="arch" type="xml">
+            <form string="Domainrobot API Test Console">
+                <header>
+                    <button name="action_test_api" type="object" string="Run API Test" class="btn-primary"/>
+                    <button name="action_clear" type="object" string="Clear" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Domainrobot API Test Console</h1>
+                    </div>
+                    <group>
+                        <field name="command"/>
+                        <field name="domain_name" attrs="{'invisible': [('command', 'not in', ['check_domain', 'status_domain'])]}" placeholder="example.de"/>
+                        <field name="domains" attrs="{'invisible': [('command', '!=', 'check_domains')]}
+                            " placeholder="example.de, example.com, example.org" help="One domain per line or comma-separated."/>
+                        <field name="first_name" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
+                        <field name="last_name" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
+                        <field name="street" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
+                        <field name="zip_code" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
+                        <field name="city" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
+                        <field name="country" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
+                        <field name="email" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
+                        <field name="phone" attrs="{'invisible': [('command', '!=', 'add_contact')] }"/>
+                    </group>
+                    <separator string="Response"/>
+                    <group>
+                        <field name="response_code"/>
+                        <field name="response_description"/>
+                    </group>
+                    <separator string="Parsed Result"/>
+                    <field name="result_payload" widget="text"/>
+                    <separator string="Raw API Response"/>
+                    <field name="raw_response" widget="text"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_domain_api_test_root" name="API Test Console"
+              parent="menu_domain_root"
+              action="action_domain_api_test"
+              sequence="30"/>
+
+</odoo>

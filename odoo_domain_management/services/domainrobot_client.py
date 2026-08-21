@@ -201,6 +201,18 @@ class DomainrobotClient:
 
     # ── Internal HTTP layer ───────────────────────────────────────────────────
 
+    def execute_command(self, command: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute a raw API command and include the raw response in the payload."""
+        raw = self._request(command)
+        result = self._parse_response(raw)
+        result['raw_response'] = raw
+        _logger.debug(
+            'Domainrobot API response: code=%s description=%s',
+            result.get('code'),
+            result.get('description'),
+        )
+        return result
+
     def _call(self, command: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute an API call.
@@ -210,18 +222,18 @@ class DomainrobotClient:
         3. Parse the plain-text response.
         4. Return a normalised dict.
         """
-        # Build URL: base_url?s_login=<user>&s_pw=<pass>
+        return self.execute_command(command)
+
+    def _request(self, command: Dict[str, Any]) -> str:
+        """Send the request and return the raw plain-text response body."""
         auth_params = urllib.parse.urlencode({
             's_login': self.username,
             's_pw': self.password,
         })
         full_url = f'{self.api_url}?{auth_params}'
-
-        # Encode command as POST body
         body = urllib.parse.urlencode(command).encode('utf-8')
 
         try:
-            # Allow self-signed certs in sandbox environments
             ctx = ssl.create_default_context()
             req = urllib.request.Request(
                 full_url,
@@ -233,7 +245,7 @@ class DomainrobotClient:
                 },
             )
             with urllib.request.urlopen(req, timeout=self.timeout, context=ctx) as resp:
-                raw = resp.read().decode('utf-8', errors='replace')
+                return resp.read().decode('utf-8', errors='replace')
         except urllib.error.URLError as exc:
             reason = exc.reason if hasattr(exc, 'reason') and exc.reason else exc
             _logger.error('Domainrobot API connection error: %s', reason)
@@ -241,14 +253,6 @@ class DomainrobotClient:
         except Exception as exc:  # pylint: disable=broad-except
             _logger.error('Domainrobot API unexpected error: %s', type(exc).__name__)
             raise DomainrobotAPIError('998', f'Unexpected error: {type(exc).__name__}') from exc
-
-        result = self._parse_response(raw)
-        _logger.debug(
-            'Domainrobot API response: code=%s description=%s',
-            result.get('code'),
-            result.get('description'),
-        )
-        return result
 
     @staticmethod
     def _parse_response(raw: str) -> Dict[str, Any]:
