@@ -21,7 +21,7 @@
         <field name="name">domain.overview.form</field>
         <field name="model">domain.overview</field>
         <field name="arch" type="xml">
-            <form string="Overview" create="false" edit="false" delete="false">
+            <form string="Overview">
                 <header>
                     <button name="refresh_dashboard" type="object" string="Refresh" class="btn-secondary"/>
                 </header>

@@ -48,8 +48,8 @@ for transfer in model.search([('needs_sync', '=', True)]):
            <field name="model_id" ref="model_domain_account"/>
            <field name="state">code</field>
            <field name="code">
-for account in model.search([]):
-   account.action_sync_account()
+from odoo.addons.odoo_domain_management.services.domainrobot_sync import DomainrobotSyncService
+DomainrobotSyncService(env).sync_all()
            </field>
            <field name="interval_number">1</field>
            <field name="interval_type">days</field>

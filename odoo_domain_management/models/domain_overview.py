@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from html import escape
 from datetime import timedelta
 
 from odoo import api, fields, models
@@ -40,11 +41,12 @@ class DomainOverview(models.TransientModel):
         domain_total = asset_model.search_count([])
         domain_active = asset_model.search_count([('status', '=', 'active')])
         domain_error = asset_model.search_count([('sync_state', '=', 'error')])
-        customer_total = partner_model.search_count([])
-        contact_total = partner_model.search_count([('active', '=', True)])
-        sync_synced = asset_model.search_count([('sync_state', '=', 'synced')]) + partner_model.search_count([('sync_state', '=', 'synced')])
-        sync_error = asset_model.search_count([('sync_state', '=', 'error')]) + partner_model.search_count([('sync_state', '=', 'error')])
-        sync_pending = asset_model.search_count([('needs_sync', '=', True)]) + partner_model.search_count([('needs_sync', '=', True)])
+        customer_total = len(asset_model.read_group([('partner_id', '!=', False)], ['partner_id'], ['partner_id']))
+        contact_domain = [('external_contact_handle', '!=', False)]
+        contact_total = partner_model.search_count(contact_domain)
+        sync_synced = asset_model.search_count([('sync_state', '=', 'synced')]) + partner_model.search_count(contact_domain + [('sync_state', '=', 'synced')])
+        sync_error = asset_model.search_count([('sync_state', '=', 'error')]) + partner_model.search_count(contact_domain + [('sync_state', '=', 'error')])
+        sync_pending = asset_model.search_count([('needs_sync', '=', True)]) + partner_model.search_count(contact_domain + [('needs_sync', '=', True)])
 
         top_customers = asset_model.read_group(
             [('partner_id', '!=', False)],
@@ -57,19 +59,27 @@ class DomainOverview(models.TransientModel):
             partner = item.get('partner_id')
             if isinstance(partner, tuple) and partner:
                 partner_name = partner[1] if len(partner) > 1 else str(partner[0])
-                customer_lines.append(f"<li><strong>{partner_name}</strong>: {item.get('__count', 0)} domains</li>")
+                customer_lines.append(f"<li><strong>{escape(partner_name)}</strong>: {item.get('__count', 0)} domains</li>")
         customer_summary = ''.join(customer_lines) or '<li>No customers with domains yet.</li>'
+        customer_summary_text = '\n'.join(
+            f"{(item.get('partner_id') or ['', 'Unknown'])[1]}: {item.get('__count', 0)} domains"
+            for item in top_customers if item.get('partner_id')
+        ) or 'No customers with domains yet.'
 
         tld_groups = asset_model.read_group([('tld', '!=', False)], ['tld'], ['tld'], limit=10)
         tld_lines = []
         for item in tld_groups:
-            tld_lines.append(f"<li><strong>{item.get('tld')}</strong>: {item.get('__count', 0)}</li>")
+            tld_lines.append(f"<li><strong>{escape(str(item.get('tld') or ''))}</strong>: {item.get('__count', 0)}</li>")
         tld_summary = ''.join(tld_lines) or '<li>No TLD data yet.</li>'
+        tld_summary_text = '\n'.join(
+            f"{item.get('tld') or 'Unknown'}: {item.get('__count', 0)}"
+            for item in tld_groups
+        ) or 'No TLD data yet.'
 
         domain_last_30 = asset_model.search_count([('create_date', '>=', previous_window)])
         domain_prev_30 = asset_model.search_count([('create_date', '>=', older_window), ('create_date', '<', previous_window)])
-        contact_last_30 = partner_model.search_count([('create_date', '>=', previous_window)])
-        contact_prev_30 = partner_model.search_count([('create_date', '>=', older_window), ('create_date', '<', previous_window)])
+        contact_last_30 = partner_model.search_count(contact_domain + [('create_date', '>=', previous_window)])
+        contact_prev_30 = partner_model.search_count(contact_domain + [('create_date', '>=', older_window), ('create_date', '<', previous_window)])
 
         def ratio_text(current, previous):
             if previous:
@@ -89,8 +99,8 @@ class DomainOverview(models.TransientModel):
             'sync_synced': sync_synced,
             'sync_error': sync_error,
             'sync_pending': sync_pending,
-            'top_customers': customer_summary,
-            'tld_distribution': tld_summary,
+            'top_customers': customer_summary_text,
+            'tld_distribution': tld_summary_text,
             'growth_domains': f"Last 30 days: {domain_last_30} | Previous 30 days: {domain_prev_30} | Δ {ratio_text(domain_last_30, domain_prev_30)}",
             'growth_contacts': f"Last 30 days: {contact_last_30} | Previous 30 days: {contact_prev_30} | Δ {ratio_text(contact_last_30, contact_prev_30)}",
             'last_sync': last_sync_value,
@@ -124,11 +134,14 @@ class DomainOverview(models.TransientModel):
 
     def refresh_dashboard(self):
         values = self._dashboard_html()
-        self.write(values)
+        overview = self[:1]
+        if not overview or not overview.id:
+            overview = self.create({'name': 'Overview'})
+        overview.write(values)
         return {
             'type': 'ir.actions.act_window',
             'res_model': self._name,
-            'res_id': self.id,
+            'res_id': overview.id,
             'view_mode': 'form',
             'target': 'current',
         }
