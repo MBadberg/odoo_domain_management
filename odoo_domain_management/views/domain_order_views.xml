@@ -10,6 +10,56 @@
         <field name="context">{'search_default_state': 'draft'}</field>
     </record>
 
+    <record id="action_domain_overview" model="ir.actions.act_window">
+        <field name="name">Overview</field>
+        <field name="res_model">domain.overview</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+    <record id="view_domain_overview_form" model="ir.ui.view">
+        <field name="name">domain.overview.form</field>
+        <field name="model">domain.overview</field>
+        <field name="arch" type="xml">
+            <form string="Overview">
+                <header>
+                    <button name="refresh_dashboard" type="object" string="Refresh" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group col="6">
+                        <field name="domain_total" widget="statinfo"/>
+                        <field name="domain_active" widget="statinfo"/>
+                        <field name="customer_total" widget="statinfo"/>
+                        <field name="contact_total" widget="statinfo"/>
+                        <field name="sync_synced" widget="statinfo"/>
+                        <field name="sync_error" widget="statinfo"/>
+                    </group>
+                    <group col="2">
+                        <group string="Growth">
+                            <field name="growth_domains" widget="text"/>
+                            <field name="growth_contacts" widget="text"/>
+                        </group>
+                        <group string="Sync Status">
+                            <field name="sync_pending" widget="statinfo"/>
+                            <field name="domain_error" widget="statinfo"/>
+                            <field name="last_sync"/>
+                        </group>
+                    </group>
+                    <group string="Dashboard Overview">
+                        <field name="stats_html" widget="html" nolabel="1"/>
+                    </group>
+                    <group string="Top Customers and TLDs">
+                        <field name="top_customers" widget="text"/>
+                        <field name="tld_distribution" widget="text"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <!-- ══ List view ════════════════════════════════════════════════════════ -->
 
     <record id="view_domain_order_list" model="ir.ui.view">
@@ -40,7 +90,7 @@
         <field name="name">domain.order.form</field>
         <field name="model">domain.order</field>
         <field name="arch" type="xml">
-            <form string="Domain Order" class="odoo_domain_management_form">
+            <form string="Domain Order">
                 <header>
                     <button name="action_check_availability" type="object"
                             string="Check Availability"
@@ -142,7 +192,7 @@
 
     <menuitem id="menu_domain_overview" name="Overview"
               parent="menu_domain_root"
-              action="action_domain_asset"
+              action="action_domain_overview"
               sequence="5"/>
 
     <menuitem id="menu_domain_orders" name="Domain Orders"

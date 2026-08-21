@@ -12,7 +12,7 @@
         <field name="name">domain.api.test.form</field>
         <field name="model">domain.api.test</field>
         <field name="arch" type="xml">
-            <form string="Domainrobot API Test Console" class="odoo_domain_management_form">
+            <form string="Domainrobot API Test Console">
                 <header>
                     <button name="action_test_api" type="object" string="Run API Test" class="btn-primary"/>
                     <button name="action_clear" type="object" string="Clear" class="btn-secondary"/>

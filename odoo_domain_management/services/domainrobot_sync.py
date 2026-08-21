@@ -390,11 +390,15 @@ class DomainrobotSyncService:
                     balance = float(properties['BALANCE'][0])
                 except (TypeError, ValueError, IndexError):
                     balance = 0.0
+            company_name = ''
+            if properties.get('COMPANY'):
+                company_name = str(properties['COMPANY'][0])
             now = fields.Datetime.now()
             account.with_context(skip_domainrobot_sync=True).write({
                 'api_response_code': result.get('code', ''),
                 'api_response_message': result.get('description', ''),
                 'account_status': result.get('description', ''),
+                'reseller_name': company_name or account.reseller_name or '',
                 'last_sync': now,
                 'last_sync_at': now,
                 'balance': balance,
@@ -411,3 +415,29 @@ class DomainrobotSyncService:
                 'needs_sync': True,
             })
         return account
+
+    def sync_all(self):
+        """Run the complete Domainrobot sync set in a predictable order."""
+        results = {
+            'contacts': [],
+            'domains': [],
+            'transfers': [],
+            'account': False,
+        }
+        try:
+            results['contacts'] = self.import_contacts()
+        except Exception as exc:  # pragma: no cover - defensive runtime guard
+            _logger.exception('Domainrobot contact import failed during full sync: %s', exc)
+        try:
+            results['domains'] = self.import_domains()
+        except Exception as exc:  # pragma: no cover - defensive runtime guard
+            _logger.exception('Domainrobot domain import failed during full sync: %s', exc)
+        try:
+            results['transfers'] = self.import_transfers()
+        except Exception as exc:  # pragma: no cover - defensive runtime guard
+            _logger.exception('Domainrobot transfer import failed during full sync: %s', exc)
+        try:
+            results['account'] = self.sync_account()
+        except Exception as exc:  # pragma: no cover - defensive runtime guard
+            _logger.exception('Domainrobot account sync failed during full sync: %s', exc)
+        return results

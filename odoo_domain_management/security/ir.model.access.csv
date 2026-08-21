@@ -5,4 +5,5 @@ access_domain_asset_user,domain.asset (internal user),model_domain_asset,base.gr
 access_domain_asset_portal,domain.asset (portal),model_domain_asset,base.group_portal,1,0,0,0
 access_domain_transfer_user,domain.transfer (internal user),model_domain_transfer,base.group_user,1,1,1,1
 access_domain_account_user,domain.account (internal user),model_domain_account,base.group_user,1,1,1,1
+access_domain_overview_user,domain.overview (internal user),model_domain_overview,base.group_user,1,1,1,1
 access_domain_api_test_user,domain.api.test (internal user),model_domain_api_test,base.group_user,1,1,1,1
