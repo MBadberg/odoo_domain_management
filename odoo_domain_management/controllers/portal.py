@@ -29,7 +29,7 @@ class DomainPortalController(CustomerPortal):
             partner = request.env.user.partner_id
             values['domain_count'] = (
                 request.env['domain.asset'].search_count([('partner_id', '=', partner.id)])
-                if partner
+                if partner and partner.exists()
                 else 0
             )
         return values
@@ -41,6 +41,16 @@ class DomainPortalController(CustomerPortal):
         """List all managed domains belonging to the logged-in user."""
         partner = request.env.user.partner_id
         DomainAsset = request.env['domain.asset']
+
+        if not partner or not partner.exists():
+            return request.render(
+                'odoo_domain_management.portal_my_domains',
+                {
+                    'domains': DomainAsset.browse(),
+                    'pager': portal_pager(url='/my/domains', total=0, page=page, step=20),
+                    'page_name': 'domain',
+                },
+            )
 
         domain_count = DomainAsset.search_count([('partner_id', '=', partner.id)])
         pager = portal_pager(
@@ -174,11 +184,13 @@ class DomainPortalController(CustomerPortal):
         success = None
         domain_name = (domain_name or '').strip().lower()
 
-        if not domain_name:
+        partner = request.env.user.partner_id
+        if not partner or not partner.exists():
+            error = _('You must be linked to a partner account before buying a domain.')
+        elif not domain_name:
             error = _('No domain name provided.')
         else:
             try:
-                partner = request.env.user.partner_id
                 # Create a draft order
                 order = request.env['domain.order'].sudo().create({
                     'name': domain_name,
@@ -227,12 +239,15 @@ class DomainPortalController(CustomerPortal):
     def _get_domain_asset_or_raise(self, domain_id):
         """Return a domain.asset record, enforcing ownership."""
         DomainAsset = request.env['domain.asset']
+        partner = request.env.user.partner_id
+        if not partner or not partner.exists():
+            raise AccessError(_('You are not linked to a partner account.'))
         try:
             domain = DomainAsset.browse(domain_id)
             if not domain.exists():
                 raise MissingError(_('This domain does not exist.'))
             # Enforce that the current user owns the domain
-            if domain.partner_id != request.env.user.partner_id:
+            if domain.partner_id != partner:
                 raise AccessError(_('You do not have access to this domain.'))
             return domain
         except (AccessError, MissingError):
