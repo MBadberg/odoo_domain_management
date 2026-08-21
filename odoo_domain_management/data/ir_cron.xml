@@ -11,7 +11,7 @@ for partner in model.search([('needs_sync', '=', True)]):
            </field>
            <field name="interval_number">1</field>
            <field name="interval_type">days</field>
-           <field name="active">False</field>
+           <field name="active">True</field>
            <field name="user_id" ref="base.user_root"/>
        </record>
 
@@ -25,7 +25,7 @@ for asset in model.search([('needs_sync', '=', True)]):
            </field>
            <field name="interval_number">1</field>
            <field name="interval_type">days</field>
-           <field name="active">False</field>
+           <field name="active">True</field>
            <field name="user_id" ref="base.user_root"/>
        </record>
 
@@ -39,7 +39,7 @@ for transfer in model.search([('needs_sync', '=', True)]):
            </field>
            <field name="interval_number">1</field>
            <field name="interval_type">days</field>
-           <field name="active">False</field>
+           <field name="active">True</field>
            <field name="user_id" ref="base.user_root"/>
        </record>
 
@@ -53,7 +53,7 @@ for account in model.search([]):
            </field>
            <field name="interval_number">1</field>
            <field name="interval_type">days</field>
-           <field name="active">False</field>
+           <field name="active">True</field>
            <field name="user_id" ref="base.user_root"/>
        </record>
    </data>
