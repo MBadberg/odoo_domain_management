@@ -47,8 +47,19 @@ class DomainAsset(models.Model):
     external_domain_id = fields.Char(
         string='External Domain ID',
         readonly=True,
+        index=True,
         help='Domain ID / reference returned by the Domainrobot API.',
     )
+    last_sync_at = fields.Datetime(string='Last Sync', readonly=True, index=True)
+    sync_state = fields.Selection(
+        [('draft', 'Draft'), ('synced', 'Synced'), ('error', 'Error')],
+        default='draft',
+        readonly=True,
+        index=True,
+        string='Sync State',
+    )
+    sync_error = fields.Text(string='Sync Error', readonly=True)
+    needs_sync = fields.Boolean(string='Needs Sync', default=False, index=True)
     registrar = fields.Char(
         string='Registrar / Provider',
         default='united-domains Reselling',
@@ -122,13 +133,27 @@ class DomainAsset(models.Model):
     # ── Business methods ──────────────────────────────────────────────────────
 
     def action_sync_status(self):
-        """Sync domain details from the Domainrobot API (skeleton)."""
+        """Sync domain details from the Domainrobot API."""
         self.ensure_one()
-        # TODO: call statusDomain API command once contract details are confirmed
-        # client = self._get_client()
-        # result = client.status_domain(self.name)
-        _logger.info('action_sync_status called for domain.asset %s – not yet implemented', self.name)
-        self.message_post(body=_('Status sync: not yet implemented for this domain.'))
+        if self.env.context.get('skip_domainrobot_sync'):
+            return False
+        try:
+            from odoo.addons.odoo_domain_management.services.domainrobot_sync import DomainrobotSyncService
+            DomainrobotSyncService(self.env).sync_domain_record(self)
+            self.message_post(body=_('Status synced from Domainrobot.'))
+            return True
+        except Exception as exc:  # pragma: no cover - defensive guard
+            _logger.warning('Domain asset sync failed for %s: %s', self.name, exc)
+            self.with_context(skip_domainrobot_sync=True).write({
+                'sync_state': 'error',
+                'sync_error': str(exc),
+                'needs_sync': True,
+            })
+            self.message_post(body=_('Domainrobot sync failed: %s') % exc)
+            return False
+
+    def action_sync_domainrobot(self):
+        return self.action_sync_status()
 
     def _get_client(self):
         from odoo.addons.odoo_domain_management.services.domainrobot_client import DomainrobotClient

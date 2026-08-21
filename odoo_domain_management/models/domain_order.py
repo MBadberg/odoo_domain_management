@@ -172,6 +172,11 @@ class DomainOrder(models.Model):
             )
         if not (self.nameserver0 and self.nameserver1):
             raise UserError(_('At least two nameservers are required for registration.'))
+        partner = self.partner_id
+        if partner and not self.owner_contact:
+            handle = partner._create_or_sync_contact_handle() if hasattr(partner, '_create_or_sync_contact_handle') else False
+            if handle:
+                self.owner_contact = handle
         if not self.owner_contact:
             raise UserError(
                 _('An owner contact handle is required. '
@@ -204,8 +209,9 @@ class DomainOrder(models.Model):
                 'date_registered': now,
                 'external_order_id': result.get('properties', {}).get('EXTERNAL_ORDER_ID', [''])[0],
             })
+            external_domain_id = result.get('properties', {}).get('DOMAINID', [''])[0] or result.get('properties', {}).get('EXTERNAL_DOMAIN_ID', [''])[0] or False
             # Create or update the linked domain asset
-            self._create_or_update_asset()
+            self._create_or_update_asset(external_domain_id)
             self.message_post(body=_('Domain successfully registered via Domainrobot API.'))
         else:
             self.write({'state': 'failed'})
@@ -232,19 +238,26 @@ class DomainOrder(models.Model):
         from odoo.addons.odoo_domain_management.services.domainrobot_client import DomainrobotClient
         return DomainrobotClient.from_system_params(self.env)
 
-    def _create_or_update_asset(self):
+    def _create_or_update_asset(self, external_domain_id=False):
         """Create or update a domain.asset record after successful registration."""
         DomainAsset = self.env['domain.asset']
-        asset = DomainAsset.search([('name', '=', self.name)], limit=1)
+        asset = DomainAsset.search([
+            '|',
+            ('external_domain_id', '=', external_domain_id),
+            ('name', '=', self.name),
+        ], limit=1)
         vals = {
             'name': self.name,
             'partner_id': self.partner_id.id,
             'user_id': self.user_id.id,
             'status': 'active',
             'order_id': self.id,
+            'external_domain_id': external_domain_id or asset.external_domain_id if asset else False,
+            'sync_state': 'synced',
+            'needs_sync': False,
         }
         if asset:
-            asset.write(vals)
+            asset.with_context(skip_domainrobot_sync=True).write(vals)
         else:
-            asset = DomainAsset.create(vals)
+            asset = DomainAsset.with_context(skip_domainrobot_sync=True).create(vals)
         self.asset_id = asset

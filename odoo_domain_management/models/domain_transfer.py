@@ -46,6 +46,17 @@ class DomainTransfer(models.Model):
     transfer_date = fields.Datetime(string='Transfer Date', default=fields.Datetime.now)
     completion_date = fields.Datetime(string='Completion Date')
     api_reference = fields.Char(string='API Reference')
+    external_transfer_id = fields.Char(string='External Transfer ID', index=True, copy=False)
+    last_sync_at = fields.Datetime(string='Last Sync', readonly=True, index=True)
+    sync_state = fields.Selection(
+        [('draft', 'Draft'), ('synced', 'Synced'), ('error', 'Error')],
+        default='draft',
+        readonly=True,
+        index=True,
+        string='Sync State',
+    )
+    sync_error = fields.Text(string='Sync Error', readonly=True)
+    needs_sync = fields.Boolean(string='Needs Sync', default=False, index=True)
     registrar = fields.Char(string='Registrar', default='Domainrobot / united-domains')
     price = fields.Float(string='Transfer Price')
     currency_id = fields.Many2one('res.currency', string='Currency')
@@ -60,16 +71,21 @@ class DomainTransfer(models.Model):
     def action_sync_from_api(self):
         """Pull transfer data from the provider and store the raw response summary."""
         self.ensure_one()
-        client = self._get_client()
-        if self.transfer_type == 'incoming':
-            result = client.query_transfer_list()
-        else:
-            result = client.query_foreign_transfer_list()
+        if self.env.context.get('skip_domainrobot_sync'):
+            return False
+        try:
+            from odoo.addons.odoo_domain_management.services.domainrobot_sync import DomainrobotSyncService
+            DomainrobotSyncService(self.env).sync_transfer_record(self)
+            self.message_post(body=_('Transfer list synced from Domainrobot.'))
+            return True
+        except Exception as exc:  # pragma: no cover - defensive guard
+            self.with_context(skip_domainrobot_sync=True).write({
+                'sync_state': 'error',
+                'sync_error': str(exc),
+                'needs_sync': True,
+            })
+            self.message_post(body=_('Domainrobot transfer sync failed: %s') % exc)
+            return False
 
-        self.write({
-            'api_response_code': result.get('code', ''),
-            'api_response_message': result.get('description', ''),
-            'status': self.status if self.status else 'pending',
-        })
-        self.message_post(body=_('Transfer list synced from Domainrobot.'))
-        return True
+    def action_sync_domainrobot(self):
+        return self.action_sync_from_api()

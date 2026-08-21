@@ -18,6 +18,7 @@ An **Odoo 19 Community** module that integrates with the [united-domains Reselli
 | Backend views (orders & managed domains) | ✅ |
 | Record rules (portal users see only own records) | ✅ |
 | Cron job skeleton for status sync | ✅ (inactive by default) |
+| Bidirectional Domainrobot sync for contacts, domains, and transfers | ✅ |
 
 ---
 
@@ -57,6 +58,18 @@ Go to **Settings → Technical → Parameters → System Parameters** and create
 You can create contact handles via the **Domain Orders** backend (or extend the module to expose a contact creation form).
 
 ---
+
+## Bidirectional sync behaviour
+
+The module now includes a lightweight sync layer that keeps Odoo and Domainrobot aligned without creating duplicate records.
+
+- `res.partner` records gain `external_contact_handle`, `last_sync_at`, `sync_state`, `sync_error`, and `needs_sync`.
+- `domain.asset` and `domain.transfer` also track their external IDs and sync metadata.
+- A `skip_domainrobot_sync` context flag prevents write loops when sync jobs update records from the API.
+- The service layer is implemented in `services/domainrobot_sync.py` and is kept separate from model logic.
+- Repeated sync runs use `external_*` identifiers and normalized names as upsert keys, so duplicate imports are avoided.
+
+Cron jobs are available under **Settings → Technical → Automation** for contacts, domains, transfers, and account status sync. They are disabled by default and can be enabled once API credentials are configured.
 
 ## How to use
 
