@@ -241,11 +241,14 @@ class DomainOrder(models.Model):
     def _create_or_update_asset(self, external_domain_id=False):
         """Create or update a domain.asset record after successful registration."""
         DomainAsset = self.env['domain.asset']
-        asset = DomainAsset.search([
-            '|',
-            ('external_domain_id', '=', external_domain_id),
-            ('name', '=', self.name),
-        ], limit=1)
+        search_domain = [('name', '=', self.name)]
+        if external_domain_id:
+            search_domain = [
+                '|',
+                ('external_domain_id', '=', external_domain_id),
+                ('name', '=', self.name),
+            ]
+        asset = DomainAsset.search(search_domain, limit=1)
         vals = {
             'name': self.name,
             'partner_id': self.partner_id.id,

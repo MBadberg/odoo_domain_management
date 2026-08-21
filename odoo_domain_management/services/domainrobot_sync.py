@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import logging
 
 from odoo import fields
@@ -106,8 +107,8 @@ class DomainrobotSyncService:
 
         handle = partner.external_contact_handle or ''
         payload = self._contact_payload(partner)
-        client = self._get_client()
         try:
+            client = self._get_client()
             if not handle:
                 result = client.add_contact(**payload)
                 handle = self._first_property_value(result, 'CONTACT', 'CONTACTHANDLE', 'HANDLE')
@@ -136,13 +137,13 @@ class DomainrobotSyncService:
         name = self.normalize_domain_name(asset.name)
         if not name:
             return asset
-        client = self._get_client()
         try:
+            client = self._get_client()
             partner_handle = ''
             if asset.partner_id and asset.partner_id.external_contact_handle:
                 partner_handle = asset.partner_id.external_contact_handle
             elif asset.partner_id:
-                partner_handle = asset.partner_id.with_context(skip_domainrobot_sync=True)._sync_single_contact_handle() if hasattr(asset.partner_id, '_sync_single_contact_handle') else ''
+                partner_handle = asset.partner_id._sync_single_contact_handle() if hasattr(asset.partner_id, '_sync_single_contact_handle') else ''
 
             payload = {}
             if partner_handle:
@@ -197,10 +198,19 @@ class DomainrobotSyncService:
             return transfer
         if not transfer.name:
             return transfer
-        client = self._get_client()
         try:
+            client = self._get_client()
             result = client.query_transfer_list() if transfer.transfer_type == 'incoming' else client.query_foreign_transfer_list()
-            transfer_id = self._first_property_value(result, 'TRANSFERID', 'EXTERNAL_TRANSFER_ID', 'ID') or transfer.external_transfer_id
+            transfer_ids = self._extract_property_values(result, 'TRANSFERID', 'EXTERNAL_TRANSFER_ID', 'ID', 'TRANSFERIDLIST')
+            transfer_domains = self._extract_property_values(result, 'DOMAIN', 'DOMAINNAME', 'NAME', 'TRANSFERDOMAIN')
+            transfer_id = ''
+            transfer_name = self.normalize_domain_name(transfer.name)
+            for idx, domain_name in enumerate(transfer_domains):
+                if self.normalize_domain_name(domain_name) == transfer_name:
+                    transfer_id = transfer_ids[idx] if idx < len(transfer_ids) else ''
+                    break
+            if not transfer_id:
+                transfer_id = transfer.external_transfer_id
             if transfer_id:
                 transfer.with_context(skip_domainrobot_sync=True).write({'external_transfer_id': transfer_id})
             api_code = result.get('code')
@@ -220,115 +230,152 @@ class DomainrobotSyncService:
             return transfer
 
     def import_contacts(self):
-        client = self._get_client()
-        result = client.query_contact_list()
-        handles = self._extract_property_values(result, 'CONTACT', 'CONTACTLIST', 'CONTACT_HANDLE', 'HANDLE')
-        if not handles:
-            return []
+        try:
+            client = self._get_client()
+            result = client.query_contact_list()
+            handles = self._extract_property_values(result, 'CONTACT', 'CONTACTLIST', 'CONTACT_HANDLE', 'HANDLE')
+            if not handles:
+                return []
 
-        partner_model = self.env['res.partner']
-        synced = []
-        for handle in handles:
-            contact = partner_model.search([('external_contact_handle', '=', handle)], limit=1)
-            if contact:
-                contact.with_context(skip_domainrobot_sync=True).write({'last_sync_at': fields.Datetime.now(), 'sync_state': 'synced', 'sync_error': '', 'needs_sync': False})
-                synced.append(contact)
-                continue
-            vals = {
-                'name': handle,
-                'external_contact_handle': handle,
-                'last_sync_at': fields.Datetime.now(),
-                'sync_state': 'synced',
-                'sync_error': '',
-                'needs_sync': False,
-            }
-            new_contact = partner_model.with_context(skip_domainrobot_sync=True).create(vals)
-            synced.append(new_contact)
-        return synced
-
-    def import_domains(self):
-        client = self._get_client()
-        result = client.query_domain_list()
-        domain_names = self._extract_property_values(result, 'DOMAIN', 'DOMAINLIST', 'DOMAINS', 'NAME')
-        if not domain_names:
-            return []
-
-        asset_model = self.env['domain.asset']
-        imported = []
-        for domain_name in domain_names:
-            normalized = self.normalize_domain_name(domain_name)
-            if not normalized:
-                continue
-            record = asset_model.search([
-                '|',
-                ('external_domain_id', '=', self._first_property_value(result, 'DOMAINID', 'EXTERNAL_DOMAIN_ID', 'ID') or ''),
-                ('name', '=', normalized),
-            ], limit=1)
-            vals = {
-                'name': normalized,
-                'external_domain_id': self._first_property_value(result, 'DOMAINID', 'EXTERNAL_DOMAIN_ID', 'ID') or '',
-                'status': 'unknown',
-                'last_sync_at': fields.Datetime.now(),
-                'sync_state': 'synced',
-                'sync_error': '',
-                'needs_sync': False,
-            }
-            if record:
-                record.with_context(skip_domainrobot_sync=True).write(vals)
-                imported.append(record)
-            else:
-                imported.append(asset_model.with_context(skip_domainrobot_sync=True).create(vals))
-        return imported
-
-    def import_transfers(self):
-        client = self._get_client()
-        models = [
-            ('incoming', client.query_transfer_list),
-            ('outgoing', client.query_foreign_transfer_list),
-        ]
-        transfers = []
-        for transfer_type, fetcher in models:
-            result = fetcher()
-            transfer_names = self._extract_property_values(result, 'DOMAIN', 'DOMAINNAME', 'NAME', 'TRANSFERDOMAIN')
-            for idx, domain_name in enumerate(transfer_names):
-                ref = self._extract_property_values(result, 'TRANSFERID', 'ID', 'TRANSFERIDLIST')[idx] if idx < len(self._extract_property_values(result, 'TRANSFERID', 'ID', 'TRANSFERIDLIST')) else ''
-                transfer_rec = self.env['domain.transfer'].search([
-                    '|',
-                    ('external_transfer_id', '=', ref),
-                    ('name', '=', domain_name),
-                ], limit=1)
+            partner_model = self.env['res.partner']
+            synced = []
+            for handle in handles:
+                contact = partner_model.search([('external_contact_handle', '=', handle)], limit=1)
+                if contact:
+                    contact.with_context(skip_domainrobot_sync=True).write({'last_sync_at': fields.Datetime.now(), 'sync_state': 'synced', 'sync_error': '', 'needs_sync': False})
+                    synced.append(contact)
+                    continue
                 vals = {
-                    'name': domain_name,
-                    'transfer_type': transfer_type,
-                    'external_transfer_id': ref,
-                    'api_response_code': result.get('code', ''),
-                    'api_response_message': result.get('description', ''),
-                    'status': 'pending',
+                    'name': handle,
+                    'external_contact_handle': handle,
                     'last_sync_at': fields.Datetime.now(),
                     'sync_state': 'synced',
                     'sync_error': '',
                     'needs_sync': False,
                 }
-                if transfer_rec:
-                    transfer_rec.with_context(skip_domainrobot_sync=True).write(vals)
-                    transfers.append(transfer_rec)
+                new_contact = partner_model.with_context(skip_domainrobot_sync=True).create(vals)
+                synced.append(new_contact)
+            return synced
+        except DomainrobotAPIError as exc:
+            _logger.warning('Domainrobot contact import failed: %s', exc)
+            return []
+
+    def import_domains(self):
+        try:
+            client = self._get_client()
+            result = client.query_domain_list()
+            domain_names = self._extract_property_values(result, 'DOMAIN', 'DOMAINLIST', 'DOMAINS', 'NAME')
+            if not domain_names:
+                return []
+
+            domain_ids = self._extract_property_values(result, 'DOMAINID', 'EXTERNAL_DOMAIN_ID', 'ID')
+            asset_model = self.env['domain.asset']
+            imported = []
+            for idx, domain_name in enumerate(domain_names):
+                normalized = self.normalize_domain_name(domain_name)
+                if not normalized:
+                    continue
+                external_domain_id = domain_ids[idx] if idx < len(domain_ids) else ''
+                search_domain = [('name', '=', normalized)]
+                if external_domain_id:
+                    search_domain = [
+                        '|',
+                        ('external_domain_id', '=', external_domain_id),
+                        ('name', '=', normalized),
+                    ]
+                record = asset_model.search(search_domain, limit=1)
+                vals = {
+                    'name': normalized,
+                    'external_domain_id': external_domain_id or (record.external_domain_id if record else ''),
+                    'status': 'unknown',
+                    'last_sync_at': fields.Datetime.now(),
+                    'sync_state': 'synced',
+                    'sync_error': '',
+                    'needs_sync': False,
+                }
+                if record:
+                    record.with_context(skip_domainrobot_sync=True).write(vals)
+                    imported.append(record)
                 else:
-                    transfers.append(self.env['domain.transfer'].with_context(skip_domainrobot_sync=True).create(vals))
-        return transfers
+                    imported.append(asset_model.with_context(skip_domainrobot_sync=True).create(vals))
+            return imported
+        except DomainrobotAPIError as exc:
+            _logger.warning('Domainrobot domain import failed: %s', exc)
+            return []
+
+    def import_transfers(self):
+        try:
+            client = self._get_client()
+            models = [
+                ('incoming', client.query_transfer_list),
+                ('outgoing', client.query_foreign_transfer_list),
+            ]
+            transfers = []
+            for transfer_type, fetcher in models:
+                result = fetcher()
+                transfer_names = self._extract_property_values(result, 'DOMAIN', 'DOMAINNAME', 'NAME', 'TRANSFERDOMAIN')
+                transfer_refs = self._extract_property_values(result, 'TRANSFERID', 'ID', 'TRANSFERIDLIST')
+                for idx, domain_name in enumerate(transfer_names):
+                    ref = transfer_refs[idx] if idx < len(transfer_refs) else ''
+                    transfer_rec = self.env['domain.transfer'].search([
+                        '|',
+                        ('external_transfer_id', '=', ref),
+                        ('name', '=', domain_name),
+                    ], limit=1)
+                    vals = {
+                        'name': domain_name,
+                        'transfer_type': transfer_type,
+                        'external_transfer_id': ref,
+                        'api_response_code': result.get('code', ''),
+                        'api_response_message': result.get('description', ''),
+                        'status': 'pending',
+                        'last_sync_at': fields.Datetime.now(),
+                        'sync_state': 'synced',
+                        'sync_error': '',
+                        'needs_sync': False,
+                    }
+                    if transfer_rec:
+                        transfer_rec.with_context(skip_domainrobot_sync=True).write(vals)
+                        transfers.append(transfer_rec)
+                    else:
+                        transfers.append(self.env['domain.transfer'].with_context(skip_domainrobot_sync=True).create(vals))
+            return transfers
+        except DomainrobotAPIError as exc:
+            _logger.warning('Domainrobot transfer import failed: %s', exc)
+            return []
 
     def sync_account(self):
-        client = self._get_client()
         account = self.env['domain.account'].search([], limit=1)
         if not account:
             account = self.env['domain.account'].with_context(skip_domainrobot_sync=True).create({'name': 'Main Account'})
-        result = client.status_user()
-        account.with_context(skip_domainrobot_sync=True).write({
-            'api_response_code': result.get('code', ''),
-            'api_response_message': result.get('description', ''),
-            'account_status': result.get('description', ''),
-            'last_sync': fields.Datetime.now(),
-            'sync_state': 'synced',
-            'sync_error': '',
-            'needs_sync': False,
-        })
+        try:
+            client = self._get_client()
+            result = client.status_user()
+            properties = result.get('properties', {}) or {}
+            balance = 0.0
+            if properties.get('BALANCE'):
+                try:
+                    balance = float(properties['BALANCE'][0])
+                except (TypeError, ValueError, IndexError):
+                    balance = 0.0
+            now = fields.Datetime.now()
+            account.with_context(skip_domainrobot_sync=True).write({
+                'api_response_code': result.get('code', ''),
+                'api_response_message': result.get('description', ''),
+                'account_status': result.get('description', ''),
+                'last_sync': now,
+                'last_sync_at': now,
+                'balance': balance,
+                'pricing_snapshot': json.dumps(properties, indent=2, sort_keys=True, ensure_ascii=False) if properties else '',
+                'sync_state': 'synced',
+                'sync_error': '',
+                'needs_sync': False,
+            })
+        except DomainrobotAPIError as exc:
+            _logger.warning('Domainrobot account sync failed: %s', exc)
+            account.with_context(skip_domainrobot_sync=True).write({
+                'sync_state': 'error',
+                'sync_error': exc.description or str(exc),
+                'needs_sync': True,
+            })
         return account
