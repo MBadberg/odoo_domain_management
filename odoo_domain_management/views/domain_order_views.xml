@@ -69,7 +69,6 @@
                     </div>
                     <group>
                         <group string="Domain">
-                            <field name="name"/>
                             <field name="tld"/>
                             <field name="period"/>
                             <field name="availability"/>
@@ -82,17 +81,20 @@
                             <field name="asset_id"/>
                         </group>
                     </group>
-                    <group string="Nameservers">
+                    <separator string="Nameservers"/>
+                    <group>
                         <field name="nameserver0"/>
                         <field name="nameserver1"/>
                     </group>
-                    <group string="Contact Handles (Domainrobot)">
+                    <separator string="Contact Handles (Domainrobot)"/>
+                    <group>
                         <field name="owner_contact"/>
                         <field name="admin_contact"/>
                         <field name="tech_contact"/>
                         <field name="billing_contact"/>
                     </group>
-                    <group string="API Response">
+                    <separator string="API Response"/>
+                    <group>
                         <field name="api_response_code"/>
                         <field name="api_response_message"/>
                         <field name="external_order_id"/>
