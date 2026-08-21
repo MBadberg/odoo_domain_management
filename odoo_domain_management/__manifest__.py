@@ -38,6 +38,11 @@ Features (MVP):
         'views/res_config_settings_views.xml',
         'views/portal_templates.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'odoo_domain_management/static/src/css/domain_form_fix.css',
+        ],
+    },
     'installable': True,
     'application': True,
     'license': 'LGPL-3',

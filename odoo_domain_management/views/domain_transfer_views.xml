@@ -29,7 +29,7 @@
         <field name="name">domain.transfer.form</field>
         <field name="model">domain.transfer</field>
         <field name="arch" type="xml">
-            <form string="Domain Transfer">
+            <form string="Domain Transfer" class="odoo_domain_management_form">
                 <header>
                     <button name="action_sync_from_api" type="object" string="Sync from API" class="btn-secondary"/>
                     <field name="status" widget="statusbar" statusbar_visible="requested,pending,approved,completed,failed,cancelled"/>
