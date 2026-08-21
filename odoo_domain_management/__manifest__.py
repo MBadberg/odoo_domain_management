@@ -32,6 +32,7 @@ Features (MVP):
         # Views
         'views/domain_order_views.xml',
         'views/domain_asset_views.xml',
+        'views/domain_api_test_views.xml',
         'views/res_config_settings_views.xml',
         'views/portal_templates.xml',
     ],
