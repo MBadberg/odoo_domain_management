@@ -1,0 +1,9 @@
+.odoo_domain_management_form .o_form_sheet_bg,
+.odoo_domain_management_form .oe_chatter {
+    min-height: 0 !important;
+    overflow: visible !important;
+}
+
+.odoo_domain_management_form .oe_chatter {
+    max-height: none !important;
+}

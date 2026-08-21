@@ -264,18 +264,34 @@ class DomainrobotSyncService:
         try:
             client = self._get_client()
             result = client.query_domain_list()
-            domain_names = self._extract_property_values(result, 'DOMAIN', 'DOMAINLIST', 'DOMAINS', 'NAME')
-            if not domain_names:
-                return []
+        except DomainrobotAPIError as exc:
+            _logger.warning('Domainrobot domain import failed: %s', exc)
+            return []
 
-            domain_ids = self._extract_property_values(result, 'DOMAINID', 'EXTERNAL_DOMAIN_ID', 'ID')
-            asset_model = self.env['domain.asset']
-            imported = []
-            for idx, domain_name in enumerate(domain_names):
-                normalized = self.normalize_domain_name(domain_name)
-                if not normalized:
-                    continue
-                external_domain_id = domain_ids[idx] if idx < len(domain_ids) else ''
+        domain_names = self._extract_property_values(result, 'DOMAIN', 'DOMAINLIST', 'DOMAINS', 'NAME')
+        if not domain_names:
+            return []
+
+        domain_ids = self._extract_property_values(result, 'DOMAINID', 'EXTERNAL_DOMAIN_ID', 'ID')
+        asset_model = self.env['domain.asset']
+        imported = []
+        for idx, domain_name in enumerate(domain_names):
+            normalized = self.normalize_domain_name(domain_name)
+            if not normalized:
+                continue
+
+            external_domain_id = domain_ids[idx] if idx < len(domain_ids) else ''
+            create_vals = {
+                'name': normalized,
+                'external_domain_id': external_domain_id,
+                'status': 'unknown',
+                'last_sync_at': fields.Datetime.now(),
+                'sync_state': 'synced',
+                'sync_error': '',
+                'needs_sync': False,
+            }
+
+            try:
                 search_domain = [('name', '=', normalized)]
                 if external_domain_id:
                     search_domain = [
@@ -284,24 +300,40 @@ class DomainrobotSyncService:
                         ('name', '=', normalized),
                     ]
                 record = asset_model.search(search_domain, limit=1)
-                vals = {
+                if record:
+                    update_vals = dict(create_vals)
+                    if not external_domain_id:
+                        update_vals.pop('external_domain_id', None)
+                    record.with_context(skip_domainrobot_sync=True).write(update_vals)
+                    imported.append(record)
+                    continue
+                imported.append(asset_model.with_context(skip_domainrobot_sync=True).create(create_vals))
+            except Exception as exc:
+                _logger.exception('Domainrobot domain import failed for %s', normalized)
+                error_create_vals = {
                     'name': normalized,
-                    'external_domain_id': external_domain_id or (record.external_domain_id if record else ''),
+                    'external_domain_id': external_domain_id,
                     'status': 'unknown',
                     'last_sync_at': fields.Datetime.now(),
-                    'sync_state': 'synced',
-                    'sync_error': '',
-                    'needs_sync': False,
+                    'sync_state': 'error',
+                    'sync_error': str(exc),
+                    'needs_sync': True,
                 }
-                if record:
-                    record.with_context(skip_domainrobot_sync=True).write(vals)
-                    imported.append(record)
-                else:
-                    imported.append(asset_model.with_context(skip_domainrobot_sync=True).create(vals))
-            return imported
-        except DomainrobotAPIError as exc:
-            _logger.warning('Domainrobot domain import failed: %s', exc)
-            return []
+                try:
+                    record = asset_model.search([('name', '=', normalized)], limit=1)
+                    if record:
+                        error_update_vals = dict(error_create_vals)
+                        if not external_domain_id:
+                            error_update_vals.pop('external_domain_id', None)
+                        record.with_context(skip_domainrobot_sync=True).write(error_update_vals)
+                        imported.append(record)
+                        continue
+                    imported.append(asset_model.with_context(skip_domainrobot_sync=True).create(error_create_vals))
+                except Exception:
+                    _logger.exception('Domainrobot import error could not be persisted for %s', normalized)
+                    imported.append(False)
+
+        return [record for record in imported if record]
 
     def import_transfers(self):
         try:

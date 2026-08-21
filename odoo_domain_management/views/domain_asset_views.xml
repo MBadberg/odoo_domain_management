@@ -42,7 +42,7 @@
         <field name="name">domain.asset.form</field>
         <field name="model">domain.asset</field>
         <field name="arch" type="xml">
-            <form string="Managed Domain">
+            <form string="Managed Domain" class="odoo_domain_management_form">
                 <header>
                     <button name="action_sync_status" type="object"
                             string="Sync Status from API"

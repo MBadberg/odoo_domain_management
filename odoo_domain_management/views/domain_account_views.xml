@@ -27,7 +27,7 @@
         <field name="name">domain.account.form</field>
         <field name="model">domain.account</field>
         <field name="arch" type="xml">
-            <form string="Account &amp; Pricing">
+            <form string="Account &amp; Pricing" class="odoo_domain_management_form">
                 <header>
                     <button name="action_sync_account" type="object" string="Sync Account" class="btn-primary"/>
                 </header>
