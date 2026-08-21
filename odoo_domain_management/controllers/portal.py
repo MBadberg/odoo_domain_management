@@ -21,15 +21,23 @@ _logger = logging.getLogger(__name__)
 class DomainPortalController(CustomerPortal):
     """Extends the Odoo customer portal with domain management pages."""
 
+    def _get_portal_partner(self):
+        """Return the current user's partner record if it exists and is valid."""
+        user = getattr(request.env, 'user', False)
+        if not user:
+            return False
+        partner = user.partner_id
+        return partner if partner and partner.exists() else False
+
     # ── Portal home count ─────────────────────────────────────────────────────
 
     def _prepare_home_portal_values(self, counters):
         values = super()._prepare_home_portal_values(counters)
         if 'domain_count' in counters:
-            partner = request.env.user.partner_id
+            partner = self._get_portal_partner()
             values['domain_count'] = (
                 request.env['domain.asset'].search_count([('partner_id', '=', partner.id)])
-                if partner and partner.exists()
+                if partner
                 else 0
             )
         return values
@@ -39,7 +47,7 @@ class DomainPortalController(CustomerPortal):
     @http.route('/my/domains', type='http', auth='user', website=True)
     def portal_my_domains(self, page=1, **kw):
         """List all managed domains belonging to the logged-in user."""
-        partner = request.env.user.partner_id
+        partner = self._get_portal_partner()
         DomainAsset = request.env['domain.asset']
 
         if not partner or not partner.exists():
@@ -184,8 +192,8 @@ class DomainPortalController(CustomerPortal):
         success = None
         domain_name = (domain_name or '').strip().lower()
 
-        partner = request.env.user.partner_id
-        if not partner or not partner.exists():
+        partner = self._get_portal_partner()
+        if not partner:
             error = _('You must be linked to a partner account before buying a domain.')
         elif not domain_name:
             error = _('No domain name provided.')
@@ -239,8 +247,8 @@ class DomainPortalController(CustomerPortal):
     def _get_domain_asset_or_raise(self, domain_id):
         """Return a domain.asset record, enforcing ownership."""
         DomainAsset = request.env['domain.asset']
-        partner = request.env.user.partner_id
-        if not partner or not partner.exists():
+        partner = self._get_portal_partner()
+        if not partner:
             raise AccessError(_('You are not linked to a partner account.'))
         try:
             domain = DomainAsset.browse(domain_id)
