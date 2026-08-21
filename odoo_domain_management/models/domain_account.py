@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import logging
 
 from odoo import fields, models, _
@@ -34,13 +35,21 @@ class DomainAccount(models.Model):
         self.ensure_one()
         client = self._get_client()
         result = client.status_user()
+        properties = result.get('properties', {}) or {}
+        balance = 0.0
+        if properties.get('BALANCE'):
+            try:
+                balance = float(properties['BALANCE'][0])
+            except (TypeError, ValueError, IndexError):
+                balance = 0.0
 
         self.write({
             'api_response_code': result.get('code', ''),
             'api_response_message': result.get('description', ''),
             'account_status': result.get('description', '') or '',
             'last_sync': fields.Datetime.now(),
-            'balance': float(result.get('properties', {}).get('BALANCE', [0])[0]) if result.get('properties', {}).get('BALANCE') else 0.0,
+            'balance': balance,
+            'pricing_snapshot': json.dumps(properties, indent=2, sort_keys=True, ensure_ascii=False) if properties else '',
         })
         self.message_post(body=_('Account and pricing data synced from the Domainrobot API.'))
         return True

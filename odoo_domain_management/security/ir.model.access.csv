@@ -4,7 +4,5 @@ access_domain_order_portal,domain.order (portal),model_domain_order,base.group_p
 access_domain_asset_user,domain.asset (internal user),model_domain_asset,base.group_user,1,1,1,1
 access_domain_asset_portal,domain.asset (portal),model_domain_asset,base.group_portal,1,0,0,0
 access_domain_transfer_user,domain.transfer (internal user),model_domain_transfer,base.group_user,1,1,1,1
-access_domain_transfer_portal,domain.transfer (portal),model_domain_transfer,base.group_portal,1,0,0,0
 access_domain_account_user,domain.account (internal user),model_domain_account,base.group_user,1,1,1,1
-access_domain_account_portal,domain.account (portal),model_domain_account,base.group_portal,1,0,0,0
 access_domain_api_test_user,domain.api.test (internal user),model_domain_api_test,base.group_user,1,1,1,1

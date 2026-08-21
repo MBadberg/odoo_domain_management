@@ -282,8 +282,6 @@ class DomainApiTester(models.TransientModel):
                 'phone': self.phone or '',
                 'email': self.email or '',
             }
-            if self.contact_handle:
-                payload['new'] = 1
             payload.update(extra)
             return payload
         if command == 'modify_contact':
@@ -360,9 +358,15 @@ class DomainApiTester(models.TransientModel):
                 continue
             if '=' in field:
                 name, value = field.split('=', 1)
-                values[name.strip()] = value.strip()
+                key = name.strip()
+                if key.lower() == 'command':
+                    continue
+                values[key] = value.strip()
             else:
-                values[field.strip()] = ''
+                key = field.strip()
+                if key.lower() == 'command':
+                    continue
+                values[key] = ''
         return values
 
     def _get_client(self):

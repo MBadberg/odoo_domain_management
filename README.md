@@ -110,7 +110,7 @@ The API client is in `services/domainrobot_client.py`.
 
 It implements the structured backend command groups documented in the bundled API handbook:
 - `check_domain(domain)` / `check_domains(domains)` – domain availability checks
-- `register_domain(...)` – domain registration (`AddDomain`)
+- `register_domain(...)` – domain registration (`adddomain`)
 - `modify_domain(...)`, `status_domain(domain)`, `delete_domain(domain)` – domain lifecycle operations
 - `transfer_domain(...)`, `check_domain_transfer(domain)`, `activate_domain_transfer(...)` – transfer flows
 - `renew_domain(...)`, `set_domain_renewal_mode(...)`, `push_domain(...)`, `sync_domain(...)` – lifecycle and registry maintenance actions
@@ -138,7 +138,7 @@ The client and models are designed to be extended:
 ## Known limitations (MVP)
 
 1. **Contact handle creation** is not exposed in the portal – customers must ask the admin to create one, or the admin must extend the portal to include a contact form.
-2. **Domain renewal / transfer / DNS** are not yet implemented – only stubs exist.
+2. **Portal self-service for renewal / transfer / DNS** is not yet implemented – these workflows are currently backend/admin driven.
 3. The client uses the `StatusDomain` command as documented in the bundled PDF and implements the documented backend command structure.
 4. **Payment integration** is not included – the module registers domains directly; invoice/payment workflows must be added separately.
 5. The cron job for status synchronisation is **disabled by default** – enable it after implementing `status_domain()`.
