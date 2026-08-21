@@ -59,7 +59,7 @@
                                             'bg-success' if domain.status == 'active'
                                             else 'bg-danger' if domain.status == 'expired'
                                             else 'bg-warning text-dark'}">
-                                            <t t-esc="domain.status.replace('_', ' ').title()"/>
+                                            <t t-esc="(domain.status or 'unknown').replace('_', ' ').title()"/>
                                         </span>
                                     </td>
                                     <td>
@@ -106,7 +106,7 @@
                                             'bg-success' if domain.status == 'active'
                                             else 'bg-danger' if domain.status == 'expired'
                                             else 'bg-warning text-dark'}">
-                                            <t t-esc="domain.status.replace('_', ' ').title()"/>
+                                            <t t-esc="(domain.status or 'unknown').replace('_', ' ').title()"/>
                                         </span>
                                     </dd>
                                     <dt class="col-sm-4">Registrar</dt>
