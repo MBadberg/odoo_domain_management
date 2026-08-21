@@ -61,6 +61,6 @@
     <menuitem id="menu_domain_api_test_root" name="API Test Console"
               parent="menu_domain_root"
               action="action_domain_api_test"
-              sequence="30"/>
+              sequence="40"/>
 
 </odoo>
