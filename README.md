@@ -108,13 +108,17 @@ This is the quick way to verify whether the transferred domains are visible from
 
 The API client is in `services/domainrobot_client.py`.
 
-It implements:
-- `check_domain(domain)` – single domain availability (command: `CheckDomain`)
-- `check_domains(domains)` – multi-domain availability (command: `CheckDomains`)
-- `register_domain(...)` – domain registration (command: `adddomain`)
-- `add_contact(...)` – contact handle creation (command: `addcontact`)
-- `status_user()` – account status (command: `statusUser`)
-- `status_domain(domain)` – domain status **TODO** (command: `StatusDomain` – verify from PDF handbook)
+It implements the structured backend command groups documented in the bundled API handbook:
+- `check_domain(domain)` / `check_domains(domains)` – domain availability checks
+- `register_domain(...)` – domain registration (`AddDomain`)
+- `modify_domain(...)`, `status_domain(domain)`, `delete_domain(domain)` – domain lifecycle operations
+- `transfer_domain(...)`, `check_domain_transfer(domain)`, `activate_domain_transfer(...)` – transfer flows
+- `renew_domain(...)`, `set_domain_renewal_mode(...)`, `push_domain(...)`, `sync_domain(...)` – lifecycle and registry maintenance actions
+- `query_domain_list(...)`, `query_transfer_list(...)`, `query_foreign_transfer_list(...)` – backend listing and reporting
+- `add_contact(...)`, `modify_contact(...)`, `status_contact(...)`, `delete_contact(...)`, `clone_contact(...)`, `query_contact_list(...)` – contact management
+- `check_nameserver(...)`, `add_nameserver(...)`, `modify_nameserver(...)`, `status_nameserver(...)`, `delete_nameserver(...)` – nameserver operations
+- `check_domain_application(...)`, `query_domain_application_list(...)`, `status_domain_application(...)`, `add_domain_application(...)`, `delete_domain_application(...)`, `pay_domain_application(...)` – domain application flows
+- `status_user()` – account status (`statusUser`)
 
 Sensitive values (password) are never written to logs.
 
@@ -135,7 +139,7 @@ The client and models are designed to be extended:
 
 1. **Contact handle creation** is not exposed in the portal – customers must ask the admin to create one, or the admin must extend the portal to include a contact form.
 2. **Domain renewal / transfer / DNS** are not yet implemented – only stubs exist.
-3. **`StatusDomain` command name** needs verification against the API handbook PDF; see `TODO` in `domainrobot_client.py`.
+3. The client uses the `StatusDomain` command as documented in the bundled PDF and implements the documented backend command structure.
 4. **Payment integration** is not included – the module registers domains directly; invoice/payment workflows must be added separately.
 5. The cron job for status synchronisation is **disabled by default** – enable it after implementing `status_domain()`.
 

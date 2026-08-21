@@ -23,8 +23,17 @@
                     </div>
                     <group>
                         <field name="command"/>
-                        <field name="domain_name" invisible="command not in ['check_domain', 'status_domain']" placeholder="example.de"/>
+                        <field name="domain_name" invisible="command not in ['check_domain', 'status_domain', 'modify_domain', 'delete_domain', 'trade_domain', 'push_domain', 'sync_domain', 'set_domain_renewal_mode', 'renew_domain', 'transfer_domain', 'check_domain_transfer', 'activate_domain_transfer', 'check_domain_application', 'add_domain_application']" placeholder="example.de"/>
                         <field name="domains" invisible="command != 'check_domains'" placeholder="example.de, example.com, example.org" help="One domain per line or comma-separated."/>
+                        <field name="contact_handle" invisible="command not in ['trade_domain', 'modify_contact', 'status_contact', 'delete_contact', 'clone_contact', 'add_domain_application']"/>
+                        <field name="nameserver_name" invisible="command not in ['check_nameserver', 'add_nameserver', 'modify_nameserver', 'status_nameserver', 'delete_nameserver']"/>
+                        <field name="application_id" invisible="command not in ['status_domain_application', 'delete_domain_application', 'pay_domain_application']"/>
+                        <field name="class_name" invisible="command not in ['check_domain_application', 'add_domain_application']"/>
+                        <field name="period_value" invisible="command not in ['renew_domain', 'add_domain_application']"/>
+                        <field name="renewal_mode" invisible="command != 'set_domain_renewal_mode'"/>
+                        <field name="transfer_action" invisible="command != 'transfer_domain'"/>
+                        <field name="target" invisible="command not in ['push_domain', 'activate_domain_transfer']"/>
+                        <field name="ip_address" invisible="command not in ['add_nameserver', 'modify_nameserver']"/>
                         <field name="first_name" invisible="command != 'add_contact'"/>
                         <field name="last_name" invisible="command != 'add_contact'"/>
                         <field name="street" invisible="command != 'add_contact'"/>
@@ -33,6 +42,7 @@
                         <field name="country" invisible="command != 'add_contact'"/>
                         <field name="email" invisible="command != 'add_contact'"/>
                         <field name="phone" invisible="command != 'add_contact'"/>
+                        <field name="extra_fields" widget="text" help="Optional raw request parameters in key=value format."/>
                     </group>
                     <separator string="Response"/>
                     <group>
