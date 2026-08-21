@@ -27,6 +27,28 @@ An **Odoo 19 Community** module that integrates with the [united-domains Reselli
 2. Restart the Odoo server.
 3. Go to **Apps**, search for *Domain Management*, and click **Install**.
 
+### Versioning
+
+The module exposes a version in both the manifest and the Python package, starting with:
+
+- `19.0.1.0.0` for the initial release
+- `19.0.1.1.0` for the first GitHub update release
+
+Each release should be tagged in GitHub with the same version string, for example `19.0.1.1.0`.
+
+### GitHub backend updates
+
+After the module is installed manually, you can update it directly from the Odoo backend:
+
+1. Go to **Settings → General Settings → Domain Management**.
+2. Set the GitHub repository URL, e.g. `https://github.com/MBadberg/odoo_domain_management`.
+3. Choose the target branch (for example `main`).
+4. Click **Check GitHub update**.
+5. If a newer release exists, the **Update from GitHub** button becomes available.
+6. Click it to pull the latest code and trigger the module upgrade.
+
+This is a simple Git-based updater for custom addons. It works for repositories that are checked out locally in the Odoo `addons` directory and support `git pull` on the server.
+
 ---
 
 ## Configuration

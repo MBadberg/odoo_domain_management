@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Domain Management (Domainrobot)',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'category': 'Website/eCommerce',
     'summary': 'Manage domain registration via the Domainrobot / united-domains Reselling API',
     'description': """
