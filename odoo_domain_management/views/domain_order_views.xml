@@ -40,7 +40,7 @@
         <field name="name">domain.order.form</field>
         <field name="model">domain.order</field>
         <field name="arch" type="xml">
-            <form string="Domain Order" class="odoo_domain_management_form">
+            <form string="Domain Order">
                 <header>
                     <button name="action_check_availability" type="object"
                             string="Check Availability"
