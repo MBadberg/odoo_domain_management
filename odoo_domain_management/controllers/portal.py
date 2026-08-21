@@ -27,8 +27,10 @@ class DomainPortalController(CustomerPortal):
         values = super()._prepare_home_portal_values(counters)
         if 'domain_count' in counters:
             partner = request.env.user.partner_id
-            values['domain_count'] = request.env['domain.asset'].search_count(
-                [('partner_id', '=', partner.id)]
+            values['domain_count'] = (
+                request.env['domain.asset'].search_count([('partner_id', '=', partner.id)])
+                if partner
+                else 0
             )
         return values
 
