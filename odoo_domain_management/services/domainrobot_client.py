@@ -164,13 +164,20 @@ class DomainrobotClient:
         country: str = 'DE',
         phone: str = '',
         email: str = '',
+        title: str = '',
+        middlename: str = '',
+        organization: str = '',
+        state: str = '',
+        fax: str = '',
+        new: int = 0,
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         Create a new contact handle on the Domainrobot platform.
 
         Returns code 200 and properties['CONTACT'][0] = contact handle.
         """
-        return self._call({
+        cmd = {
             'command': 'addcontact',
             'firstname': firstname,
             'lastname': lastname,
@@ -180,7 +187,69 @@ class DomainrobotClient:
             'country': country,
             'phone': phone,
             'email': email,
-        })
+        }
+        for key, value in {
+            'title': title,
+            'middlename': middlename,
+            'organization': organization,
+            'state': state,
+            'fax': fax,
+            'new': new,
+        }.items():
+            if value not in ('', None):
+                cmd[key] = value
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def modify_contact(self, contact: str, **kwargs) -> Dict[str, Any]:
+        """Modify an existing contact handle."""
+        cmd = {'command': 'ModifyContact', 'contact': contact}
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def status_contact(self, contact: str) -> Dict[str, Any]:
+        """Query information about a contact handle."""
+        return self._call({'command': 'StatusContact', 'contact': contact})
+
+    def delete_contact(self, contact: str) -> Dict[str, Any]:
+        """Delete an existing contact handle."""
+        return self._call({'command': 'DeleteContact', 'contact': contact})
+
+    def clone_contact(self, contact: str) -> Dict[str, Any]:
+        """Clone an existing contact handle."""
+        return self._call({'command': 'CloneContact', 'contact': contact})
+
+    def query_contact_list(self, **kwargs) -> Dict[str, Any]:
+        """Query a list of contact handles."""
+        cmd = {'command': 'QueryContactList'}
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def check_nameserver(self, nameserver: str) -> Dict[str, Any]:
+        """Check if a nameserver host is available."""
+        return self._call({'command': 'CheckNameserver', 'nameserver': nameserver})
+
+    def add_nameserver(self, nameserver: str, ipaddresses: list) -> Dict[str, Any]:
+        """Create a nameserver host."""
+        cmd = {'command': 'AddNameserver', 'nameserver': nameserver}
+        for idx, ip in enumerate(ipaddresses):
+            cmd[f'ipaddress{idx}'] = ip
+        return self._call(cmd)
+
+    def modify_nameserver(self, nameserver: str, ipaddresses: list) -> Dict[str, Any]:
+        """Modify the IP addresses of a nameserver host."""
+        cmd = {'command': 'ModifyNameserver', 'nameserver': nameserver}
+        for idx, ip in enumerate(ipaddresses):
+            cmd[f'ipaddress{idx}'] = ip
+        return self._call(cmd)
+
+    def status_nameserver(self, nameserver: str) -> Dict[str, Any]:
+        """Query status for a nameserver host."""
+        return self._call({'command': 'StatusNameserver', 'nameserver': nameserver})
+
+    def delete_nameserver(self, nameserver: str) -> Dict[str, Any]:
+        """Delete a nameserver host."""
+        return self._call({'command': 'DeleteNameserver', 'nameserver': nameserver})
 
     def status_user(self) -> Dict[str, Any]:
         """
@@ -190,14 +259,141 @@ class DomainrobotClient:
         """
         return self._call({'command': 'statusUser'})
 
-    def status_domain(self, domain: str) -> Dict[str, Any]:
-        """
-        Retrieve the status of an already-registered domain.
+    def modify_domain(self, domain: str, **kwargs) -> Dict[str, Any]:
+        """Update contacts, nameservers or status flags on an existing domain."""
+        cmd = {'command': 'ModifyDomain', 'domain': domain}
+        cmd.update(kwargs)
+        return self._call(cmd)
 
-        TODO: verify the exact command name from the API handbook PDF.
-        """
-        # TODO: confirm command name with API handbook (may be 'StatusDomain')
+    def status_domain(self, domain: str) -> Dict[str, Any]:
+        """Retrieve the status of an already-registered domain."""
         return self._call({'command': 'StatusDomain', 'domain': domain})
+
+    def delete_domain(self, domain: str) -> Dict[str, Any]:
+        """Delete a domain immediately."""
+        return self._call({'command': 'DeleteDomain', 'domain': domain})
+
+    def trade_domain(self, domain: str, ownercontact0: str, **kwargs) -> Dict[str, Any]:
+        """Trade a domain to a new owner contact."""
+        cmd = {'command': 'TradeDomain', 'domain': domain, 'ownercontact0': ownercontact0}
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def push_domain(self, domain: str, target: str, **kwargs) -> Dict[str, Any]:
+        """Push a domain into a registry-specific transfer state."""
+        cmd = {'command': 'PushDomain', 'domain': domain, 'target': target}
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def sync_domain(self, domain: str) -> Dict[str, Any]:
+        """Synchronise a domain against the registry state."""
+        return self._call({'command': 'SyncDomain', 'domain': domain})
+
+    def set_domain_renewal_mode(self, domain: str, renewalmode: str, **kwargs) -> Dict[str, Any]:
+        """Set the renewal mode for a domain."""
+        cmd = {'command': 'SetDomainRenewalMode', 'domain': domain, 'renewalmode': renewalmode}
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def renew_domain(self, domain: str, period: str = '1Y', **kwargs) -> Dict[str, Any]:
+        """Explicitly renew a domain at the registry."""
+        cmd = {'command': 'RenewDomain', 'domain': domain, 'period': period}
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def transfer_domain(self, domain: str, action: str = 'REQUEST', **kwargs) -> Dict[str, Any]:
+        """Request, approve, deny or cancel a domain transfer."""
+        cmd = {'command': 'TransferDomain', 'domain': domain, 'action': action}
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def check_domain_transfer(self, domain: str) -> Dict[str, Any]:
+        """Check whether a transfer is possible for a domain."""
+        return self._call({'command': 'CheckDomainTransfer', 'domain': domain})
+
+    def activate_domain_transfer(self, domain: str, trigger: str = '', transfer_id: str = '', **kwargs) -> Dict[str, Any]:
+        """Approve a branded transfer flow using the custom link parameters."""
+        cmd = {'command': 'ActivateDomainTransfer', 'domain': domain}
+        if trigger:
+            cmd['trigger'] = trigger
+        if transfer_id:
+            cmd['id'] = transfer_id
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def query_domain_list(self, **kwargs) -> Dict[str, Any]:
+        """Return the list of your domains, optionally filtered."""
+        cmd = {'command': 'QueryDomainList'}
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def query_transfer_list(self, **kwargs) -> Dict[str, Any]:
+        """Return incoming domain transfer requests."""
+        cmd = {'command': 'QueryTransferList'}
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def query_foreign_transfer_list(self, **kwargs) -> Dict[str, Any]:
+        """Return outgoing transfer requests (domain transfers away from your account)."""
+        cmd = {'command': 'QueryForeignTransferList'}
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def check_domain_application(self, domain: str, class_name: str, **kwargs) -> Dict[str, Any]:
+        """Check how many applications exist for a domain registration."""
+        cmd = {'command': 'CheckDomainApplication', 'domain': domain, 'class': class_name}
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def query_domain_application_list(self, **kwargs) -> Dict[str, Any]:
+        """Query a list of domain applications."""
+        cmd = {'command': 'QueryDomainApplicationList'}
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def status_domain_application(self, application: str, wide: int = 0) -> Dict[str, Any]:
+        """Query details of a specific domain application."""
+        cmd = {'command': 'StatusDomainApplication', 'application': application}
+        if wide:
+            cmd['wide'] = int(wide)
+        return self._call(cmd)
+
+    def add_domain_application(
+        self,
+        domain: str,
+        period: int,
+        class_name: str,
+        ownercontact0: str,
+        admincontact0: str,
+        techcontact0: str,
+        billingcontact0: str,
+        nameserver0: str,
+        nameserver1: str,
+        **kwargs,
+    ) -> Dict[str, Any]:
+        """Add a new domain application for a future TLD launch."""
+        cmd = {
+            'command': 'AddDomainApplication',
+            'domain': domain,
+            'period': str(period),
+            'class': class_name,
+            'ownercontact0': ownercontact0,
+            'admincontact0': admincontact0,
+            'techcontact0': techcontact0,
+            'billingcontact0': billingcontact0,
+            'nameserver0': nameserver0,
+            'nameserver1': nameserver1,
+        }
+        cmd.update(kwargs)
+        return self._call(cmd)
+
+    def delete_domain_application(self, application: str) -> Dict[str, Any]:
+        """Delete a domain application."""
+        return self._call({'command': 'DeleteDomainApplication', 'application': application})
+
+    def pay_domain_application(self, application: str) -> Dict[str, Any]:
+        """Pay a domain application."""
+        return self._call({'command': 'PayDomainApplication', 'application': application})
 
     # ── Internal HTTP layer ───────────────────────────────────────────────────
 

@@ -140,6 +140,11 @@
 
     <menuitem id="menu_domain_root" name="Domains" sequence="50"/>
 
+    <menuitem id="menu_domain_overview" name="Overview"
+              parent="menu_domain_root"
+              action="action_domain_asset"
+              sequence="5"/>
+
     <menuitem id="menu_domain_orders" name="Domain Orders"
               parent="menu_domain_root"
               action="action_domain_order"

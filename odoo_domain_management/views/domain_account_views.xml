@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_domain_account" model="ir.actions.act_window">
+        <field name="name">Account &amp; Pricing</field>
+        <field name="res_model">domain.account</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_domain_account_list" model="ir.ui.view">
+        <field name="name">domain.account.list</field>
+        <field name="model">domain.account</field>
+        <field name="arch" type="xml">
+            <list string="Account &amp; Pricing">
+                <field name="name"/>
+                <field name="reseller_name"/>
+                <field name="provider"/>
+                <field name="balance"/>
+                <field name="currency_id"/>
+                <field name="last_sync"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_domain_account_form" model="ir.ui.view">
+        <field name="name">domain.account.form</field>
+        <field name="model">domain.account</field>
+        <field name="arch" type="xml">
+            <form string="Account &amp; Pricing">
+                <header>
+                    <button name="action_sync_account" type="object" string="Sync Account" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Account">
+                            <field name="reseller_name"/>
+                            <field name="provider"/>
+                            <field name="balance"/>
+                            <field name="currency_id"/>
+                            <field name="last_sync"/>
+                        </group>
+                        <group string="API Response">
+                            <field name="api_response_code"/>
+                            <field name="api_response_message"/>
+                        </group>
+                    </group>
+                    <separator string="Status"/>
+                    <field name="account_status" widget="text"/>
+                    <separator string="Pricing Snapshot"/>
+                    <field name="pricing_snapshot" widget="text"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_domain_account" name="Account &amp; Pricing" parent="menu_domain_root" action="action_domain_account" sequence="30"/>
+</odoo>

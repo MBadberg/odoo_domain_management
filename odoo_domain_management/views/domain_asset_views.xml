@@ -121,6 +121,6 @@
     <menuitem id="menu_domain_assets" name="Managed Domains"
               parent="menu_domain_root"
               action="action_domain_asset"
-              sequence="20"/>
+              sequence="15"/>
 
 </odoo>

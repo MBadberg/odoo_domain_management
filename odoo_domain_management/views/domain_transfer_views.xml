@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_domain_transfer" model="ir.actions.act_window">
+        <field name="name">Transfers</field>
+        <field name="res_model">domain.transfer</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_domain_transfer_list" model="ir.ui.view">
+        <field name="name">domain.transfer.list</field>
+        <field name="model">domain.transfer</field>
+        <field name="arch" type="xml">
+            <list string="Transfers" decoration-success="status == 'completed'" decoration-warning="status in ['requested', 'pending']" decoration-danger="status in ['failed', 'cancelled']">
+                <field name="name"/>
+                <field name="transfer_type"/>
+                <field name="partner_id"/>
+                <field name="status" widget="badge"/>
+                <field name="transfer_date"/>
+                <field name="completion_date"/>
+                <field name="price"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_domain_transfer_form" model="ir.ui.view">
+        <field name="name">domain.transfer.form</field>
+        <field name="model">domain.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Domain Transfer">
+                <header>
+                    <button name="action_sync_from_api" type="object" string="Sync from API" class="btn-secondary"/>
+                    <field name="status" widget="statusbar" statusbar_visible="requested,pending,approved,completed,failed,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="example.de"/></h1>
+                    </div>
+                    <group>
+                        <group string="Transfer Details">
+                            <field name="transfer_type"/>
+                            <field name="domain_id"/>
+                            <field name="partner_id"/>
+                            <field name="registrar"/>
+                            <field name="api_reference"/>
+                        </group>
+                        <group string="Dates and Value">
+                            <field name="transfer_date"/>
+                            <field name="completion_date"/>
+                            <field name="price"/>
+                            <field name="currency_id"/>
+                        </group>
+                    </group>
+                    <separator string="API Result"/>
+                    <group>
+                        <field name="api_response_code"/>
+                        <field name="api_response_message"/>
+                    </group>
+                    <separator string="Notes"/>
+                    <field name="notes" nolabel="1"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_domain_transfer_search" model="ir.ui.view">
+        <field name="name">domain.transfer.search</field>
+        <field name="model">domain.transfer</field>
+        <field name="arch" type="xml">
+            <search string="Search Transfers">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="status"/>
+                <field name="transfer_type"/>
+                <filter string="Incoming" name="incoming" domain="[('transfer_type', '=', 'incoming')]"/>
+                <filter string="Outgoing" name="outgoing" domain="[('transfer_type', '=', 'outgoing')]"/>
+                <filter string="Completed" name="completed" domain="[('status', '=', 'completed')]"/>
+                <filter string="Pending" name="pending" domain="[('status', 'in', ['requested', 'pending', 'approved'])]"/>
+            </search>
+        </field>
+    </record>
+
+    <menuitem id="menu_domain_transfers" name="Transfers" parent="menu_domain_root" action="action_domain_transfer" sequence="25"/>
+</odoo>
