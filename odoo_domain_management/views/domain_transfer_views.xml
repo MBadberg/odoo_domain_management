@@ -15,6 +15,9 @@
                 <field name="transfer_type"/>
                 <field name="partner_id"/>
                 <field name="status" widget="badge"/>
+                <field name="external_transfer_id"/>
+                <field name="last_sync_at"/>
+                <field name="sync_state"/>
                 <field name="transfer_date"/>
                 <field name="completion_date"/>
                 <field name="price"/>
@@ -42,6 +45,11 @@
                             <field name="partner_id"/>
                             <field name="registrar"/>
                             <field name="api_reference"/>
+                            <field name="external_transfer_id"/>
+                            <field name="last_sync_at"/>
+                            <field name="sync_state"/>
+                            <field name="sync_error"/>
+                            <field name="needs_sync"/>
                         </group>
                         <group string="Dates and Value">
                             <field name="transfer_date"/>

@@ -20,7 +20,17 @@ class DomainAccount(models.Model):
     provider = fields.Char(string='Provider', default='Domainrobot / united-domains')
     balance = fields.Float(string='Balance', default=0.0)
     currency_id = fields.Many2one('res.currency', string='Currency')
-    last_sync = fields.Datetime(string='Last Sync', readonly=True)
+    last_sync = fields.Datetime(string='Last Sync', readonly=True, index=True)
+    last_sync_at = fields.Datetime(string='Last Sync At', readonly=True, index=True)
+    sync_state = fields.Selection(
+        [('draft', 'Draft'), ('synced', 'Synced'), ('error', 'Error')],
+        default='draft',
+        readonly=True,
+        index=True,
+        string='Sync State',
+    )
+    sync_error = fields.Text(string='Sync Error', readonly=True)
+    needs_sync = fields.Boolean(string='Needs Sync', default=False, index=True)
     account_status = fields.Text(string='Account Status', readonly=True)
     pricing_snapshot = fields.Text(string='Pricing Snapshot', readonly=True)
     api_response_code = fields.Char(string='API Response Code', readonly=True)
@@ -33,23 +43,21 @@ class DomainAccount(models.Model):
     def action_sync_account(self):
         """Fetch account status and keep a simple pricing snapshot in the backend."""
         self.ensure_one()
-        client = self._get_client()
-        result = client.status_user()
-        properties = result.get('properties', {}) or {}
-        balance = 0.0
-        if properties.get('BALANCE'):
-            try:
-                balance = float(properties['BALANCE'][0])
-            except (TypeError, ValueError, IndexError):
-                balance = 0.0
+        if self.env.context.get('skip_domainrobot_sync'):
+            return False
+        try:
+            from odoo.addons.odoo_domain_management.services.domainrobot_sync import DomainrobotSyncService
+            DomainrobotSyncService(self.env).sync_account()
+            self.message_post(body=_('Account and pricing data synced from the Domainrobot API.'))
+            return True
+        except Exception as exc:  # pragma: no cover - defensive guard
+            self.with_context(skip_domainrobot_sync=True).write({
+                'sync_state': 'error',
+                'sync_error': str(exc),
+                'needs_sync': True,
+            })
+            self.message_post(body=_('Domainrobot account sync failed: %s') % exc)
+            return False
 
-        self.write({
-            'api_response_code': result.get('code', ''),
-            'api_response_message': result.get('description', ''),
-            'account_status': result.get('description', '') or '',
-            'last_sync': fields.Datetime.now(),
-            'balance': balance,
-            'pricing_snapshot': json.dumps(properties, indent=2, sort_keys=True, ensure_ascii=False) if properties else '',
-        })
-        self.message_post(body=_('Account and pricing data synced from the Domainrobot API.'))
-        return True
+    def action_sync_domainrobot(self):
+        return self.action_sync_account()

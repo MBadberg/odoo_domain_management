@@ -17,6 +17,8 @@
                 <field name="balance"/>
                 <field name="currency_id"/>
                 <field name="last_sync"/>
+                <field name="last_sync_at"/>
+                <field name="sync_state"/>
             </list>
         </field>
     </record>
@@ -40,6 +42,10 @@
                             <field name="balance"/>
                             <field name="currency_id"/>
                             <field name="last_sync"/>
+                            <field name="last_sync_at"/>
+                            <field name="sync_state"/>
+                            <field name="sync_error"/>
+                            <field name="needs_sync"/>
                         </group>
                         <group string="API Response">
                             <field name="api_response_code"/>

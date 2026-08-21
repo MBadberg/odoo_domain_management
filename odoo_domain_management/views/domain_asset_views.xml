@@ -25,6 +25,9 @@
                 <field name="date_registration"/>
                 <field name="date_expiry"/>
                 <field name="days_until_expiry" string="Days Left"/>
+                <field name="external_domain_id"/>
+                <field name="last_sync_at"/>
+                <field name="sync_state"/>
                 <field name="status" widget="badge"
                        decoration-success="status == 'active'"
                        decoration-danger="status == 'expired'"
@@ -59,6 +62,10 @@
                             <field name="tld"/>
                             <field name="registrar"/>
                             <field name="external_domain_id"/>
+                            <field name="last_sync_at"/>
+                            <field name="sync_state"/>
+                            <field name="sync_error"/>
+                            <field name="needs_sync"/>
                         </group>
                         <group string="Owner">
                             <field name="partner_id"/>
