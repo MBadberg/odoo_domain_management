@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    var navToggle = document.querySelector('[data-domain-nav-toggle]');
-    var navPanel = document.querySelector('[data-domain-nav-panel]');
+    var navToggle = homepage.querySelector('[data-domain-nav-toggle]');
+    var navPanel = homepage.querySelector('[data-domain-nav-panel]');
     if (navToggle && navPanel) {
         navToggle.addEventListener('click', function () {
             var isOpen = navPanel.classList.toggle('is-open');
@@ -13,9 +13,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    var form = document.querySelector('[data-domain-mockup-form]');
-    var input = document.getElementById('badberg-domain-input');
-    var results = document.querySelector('[data-domain-mockup-results]');
+    var form = homepage.querySelector('[data-domain-mockup-form]');
+    var input = homepage.querySelector('#badberg-domain-input');
+    var results = homepage.querySelector('[data-domain-mockup-results]');
     var variants = [
         {tld: 'de', available: true, price: '12,00 € / Jahr', detail: 'Domainregistrierung mit DNS-Unterstützung'},
         {tld: 'com', available: false, price: null, detail: 'Nicht mehr frei. Prüfe alternative Schreibweisen oder andere TLDs.'},
@@ -32,7 +32,11 @@ document.addEventListener('DOMContentLoaded', function () {
             return 'ihre-wunschdomain';
         }
         var parts = normalized.split('.').filter(Boolean);
-        return parts.length > 1 ? parts[0] : normalized;
+        if (parts.length > 1) {
+            parts.pop();
+            return parts.join('.');
+        }
+        return normalized;
     }
 
     function renderResults(base) {
@@ -63,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (variant.available) {
                 var registerLink = document.createElement('a');
-                registerLink.href = '/web/login?redirect=/my/domains/check';
+                registerLink.href = '/my/domains/check';
                 registerLink.className = 'badberg-result-action';
                 registerLink.textContent = 'Registrieren';
                 article.appendChild(registerLink);
@@ -78,21 +82,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             results.appendChild(article);
         });
-
-        bindSuggestionButtons();
-    }
-
-    function bindSuggestionButtons() {
-        document.querySelectorAll('[data-domain-suggestion]').forEach(function (button) {
-            button.addEventListener('click', function () {
-                var suggestion = button.getAttribute('data-domain-suggestion') || 'ihre-wunschdomain';
-                if (input) {
-                    input.value = suggestion;
-                    input.focus();
-                }
-                renderResults(suggestion);
-            });
-        });
     }
 
     if (form && input && results) {
@@ -101,7 +90,16 @@ document.addEventListener('DOMContentLoaded', function () {
             renderResults(normalizeBase(input.value));
             results.scrollIntoView({behavior: 'smooth', block: 'start'});
         });
-    }
 
-    bindSuggestionButtons();
+        results.addEventListener('click', function (event) {
+            var button = event.target.closest('[data-domain-suggestion]');
+            if (!button) {
+                return;
+            }
+            var suggestion = button.getAttribute('data-domain-suggestion') || 'ihre-wunschdomain';
+            input.value = suggestion;
+            input.focus();
+            renderResults(suggestion);
+        });
+    }
 });

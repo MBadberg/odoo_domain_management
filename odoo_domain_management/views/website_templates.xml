@@ -25,7 +25,7 @@
                                 <a href="#it-service">IT-Service</a>
                                 <a href="/blog">Blog</a>
                                 <a href="#contact">Kontakt</a>
-                                <a href="/web/login" class="badberg-nav-cta">Kundenlogin</a>
+                                <a href="/my" class="badberg-nav-cta">Kundenlogin</a>
                             </div>
                         </nav>
 
@@ -65,7 +65,7 @@
 
                                 <div class="badberg-hero-actions">
                                     <a href="#domain-results" class="badberg-button badberg-button-primary">Domain-Ideen ansehen</a>
-                                    <a href="/web/login" class="badberg-button badberg-button-secondary">Zum Kundenlogin</a>
+                                    <a href="/my" class="badberg-button badberg-button-secondary">Zum Kundenlogin</a>
                                 </div>
                             </div>
 
@@ -127,7 +127,7 @@
                                         <h3>beispielprojekt.de</h3>
                                         <p>12,00 € / Jahr · Domainregistrierung mit DNS-Unterstützung</p>
                                     </div>
-                                    <a href="/web/login?redirect=/my/domains/check" class="badberg-result-action">Registrieren</a>
+                                    <a href="/my/domains/check" class="badberg-result-action">Registrieren</a>
                                 </article>
                                 <article class="badberg-result-card is-unavailable">
                                     <div>
@@ -147,7 +147,7 @@
                                         <h3>beispielprojekt.eu</h3>
                                         <p>9,00 € / Jahr · Gute Ergänzung für europaweite Präsenz</p>
                                     </div>
-                                    <a href="/web/login?redirect=/my/domains/check" class="badberg-result-action">Registrieren</a>
+                                    <a href="/my/domains/check" class="badberg-result-action">Registrieren</a>
                                 </article>
                                 <article class="badberg-result-card is-available">
                                     <div>
@@ -155,7 +155,7 @@
                                         <h3>beispielprojekt.net</h3>
                                         <p>13,00 € / Jahr · Besonders passend für technische Angebote</p>
                                     </div>
-                                    <a href="/web/login?redirect=/my/domains/check" class="badberg-result-action">Registrieren</a>
+                                    <a href="/my/domains/check" class="badberg-result-action">Registrieren</a>
                                 </article>
                             </div>
                         </div>
@@ -279,7 +279,7 @@
                                 <a href="#it-service">IT-Service</a>
                                 <a href="/blog">Blog</a>
                                 <a href="/contactus">Kontakt</a>
-                                <a href="/web/login">Kundenlogin</a>
+                                <a href="/my">Kundenlogin</a>
                             </div>
                         </div>
                 </footer>
