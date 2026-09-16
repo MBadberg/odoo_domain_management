@@ -1,0 +1,483 @@
+:root {
+    --badberg-bg: #f5f7fb;
+    --badberg-surface: #ffffff;
+    --badberg-surface-soft: #eef3fb;
+    --badberg-text: #142033;
+    --badberg-text-soft: #50627d;
+    --badberg-border: #d9e2f0;
+    --badberg-accent: #265dff;
+    --badberg-accent-dark: #173caa;
+    --badberg-success: #117a4f;
+    --badberg-danger: #b0334b;
+}
+
+body.badberg-homepage-active {
+    background: var(--badberg-bg);
+    color: var(--badberg-text);
+}
+
+body.badberg-homepage-active #top,
+body.badberg-homepage-active header#top,
+body.badberg-homepage-active #bottom,
+body.badberg-homepage-active footer#bottom,
+body.badberg-homepage-active #footer,
+body.badberg-homepage-active footer#footer {
+    display: none !important;
+}
+
+.badberg-homepage {
+    background: linear-gradient(180deg, #ffffff 0%, var(--badberg-bg) 100%);
+    color: var(--badberg-text);
+
+    * {
+        box-sizing: border-box;
+    }
+
+    a,
+    button,
+    input,
+    summary {
+        &:focus-visible {
+            outline: 3px solid rgba(38, 93, 255, 0.35);
+            outline-offset: 3px;
+        }
+    }
+}
+
+.badberg-shell {
+    width: min(1180px, calc(100% - 2rem));
+    margin: 0 auto;
+}
+
+.badberg-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.badberg-hero {
+    padding: 1.25rem 0 4rem;
+}
+
+.badberg-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid rgba(217, 226, 240, 0.8);
+    border-radius: 1.25rem;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+}
+
+.badberg-brand {
+    display: inline-flex;
+    flex-direction: column;
+    color: var(--badberg-text);
+    text-decoration: none;
+}
+
+.badberg-brand-mark {
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.badberg-brand-subline,
+.badberg-note,
+.badberg-inline-points,
+.badberg-section-heading p,
+.badberg-result-label,
+.badberg-service-icon,
+.badberg-panel-kicker,
+.badberg-footer-links a,
+.badberg-tld-card span {
+    color: var(--badberg-text-soft);
+}
+
+.badberg-nav-toggle {
+    display: none;
+    border: 1px solid var(--badberg-border);
+    background: var(--badberg-surface);
+    color: var(--badberg-text);
+    border-radius: 999px;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+}
+
+.badberg-nav-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+
+    a {
+        color: var(--badberg-text);
+        text-decoration: none;
+        font-weight: 600;
+    }
+}
+
+.badberg-nav-cta,
+.badberg-button,
+.badberg-result-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.9rem 1.2rem;
+    text-decoration: none;
+    font-weight: 700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+    }
+}
+
+.badberg-nav-cta,
+.badberg-button-primary,
+.badberg-result-action {
+    background: var(--badberg-accent);
+    color: #ffffff !important;
+    box-shadow: 0 12px 24px rgba(38, 93, 255, 0.16);
+}
+
+.badberg-button-secondary,
+.badberg-result-action-secondary {
+    border: 1px solid var(--badberg-border);
+    background: var(--badberg-surface);
+    color: var(--badberg-text);
+}
+
+.badberg-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
+    gap: 2rem;
+    align-items: start;
+    margin-top: 2rem;
+}
+
+.badberg-hero-copy,
+.badberg-tld-panel,
+.badberg-about-card,
+.badberg-result-card,
+.badberg-service-card,
+.badberg-page-footer-layout,
+.badberg-process-list li,
+.badberg-faq-list details {
+    border: 1px solid rgba(217, 226, 240, 0.85);
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 24px 50px rgba(20, 32, 51, 0.06);
+}
+
+.badberg-hero-copy {
+    padding: 2.5rem;
+}
+
+.badberg-eyebrow,
+.badberg-panel-kicker,
+.badberg-result-label {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.badberg-homepage h1,
+.badberg-homepage h2,
+.badberg-homepage h3 {
+    margin-top: 0;
+    color: var(--badberg-text);
+}
+
+.badberg-homepage h1 {
+    font-size: clamp(2.6rem, 5vw, 4.7rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    margin-bottom: 1rem;
+}
+
+.badberg-homepage h2 {
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+}
+
+.badberg-lead,
+.badberg-section-heading p,
+.badberg-homepage p,
+.badberg-homepage li,
+.badberg-homepage span {
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.badberg-domain-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.9rem;
+    margin: 2rem 0 1rem;
+
+    input {
+        min-height: 3.75rem;
+        border: 1px solid var(--badberg-border);
+        border-radius: 1rem;
+        padding: 0 1.1rem;
+        font-size: 1rem;
+        color: var(--badberg-text);
+        background: #ffffff;
+    }
+
+    button {
+        min-height: 3.75rem;
+        border: 0;
+        border-radius: 1rem;
+        padding: 0 1.35rem;
+        font-weight: 700;
+        color: #ffffff;
+        background: var(--badberg-accent);
+        box-shadow: 0 14px 24px rgba(38, 93, 255, 0.18);
+    }
+}
+
+.badberg-inline-points,
+.badberg-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+}
+
+.badberg-inline-points span {
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: var(--badberg-surface-soft);
+}
+
+.badberg-hero-actions {
+    margin-top: 1.5rem;
+}
+
+.badberg-tld-panel {
+    padding: 2rem;
+}
+
+.badberg-tld-grid,
+.badberg-result-list,
+.badberg-service-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.badberg-tld-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 1.5rem;
+}
+
+.badberg-tld-card,
+.badberg-service-card {
+    padding: 1.25rem;
+    border-radius: 1.1rem;
+    background: var(--badberg-surface-soft);
+}
+
+.badberg-section {
+    padding: 0 0 4rem;
+}
+
+.badberg-section-soft {
+    background: linear-gradient(180deg, rgba(238, 243, 251, 0.45) 0%, rgba(245, 247, 251, 0) 100%);
+}
+
+.badberg-section-heading {
+    max-width: 48rem;
+    margin-bottom: 1.75rem;
+}
+
+.badberg-result-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.badberg-result-card,
+.badberg-about-card,
+.badberg-page-footer-layout {
+    padding: 1.5rem;
+}
+
+.badberg-result-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    &.is-available {
+        border-color: rgba(17, 122, 79, 0.18);
+    }
+
+    &.is-unavailable {
+        border-color: rgba(176, 51, 75, 0.18);
+    }
+}
+
+.badberg-service-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.badberg-service-icon {
+    display: inline-flex;
+    margin-bottom: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.badberg-trust-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.badberg-trust-list,
+.badberg-process-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.badberg-trust-list li {
+    position: relative;
+    padding: 0 0 0 2rem;
+    margin-bottom: 1rem;
+}
+
+.badberg-trust-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--badberg-success);
+    font-weight: 800;
+}
+
+.badberg-process-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.badberg-process-list li {
+    padding: 1.5rem;
+}
+
+.badberg-about-card {
+    display: grid;
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr) auto;
+    gap: 1.25rem;
+    align-items: center;
+}
+
+.badberg-faq-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.badberg-faq-list details {
+    padding: 1.25rem 1.5rem;
+}
+
+.badberg-faq-list summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--badberg-text);
+}
+
+.badberg-page-footer {
+    padding: 0 0 3rem;
+}
+
+.badberg-page-footer-layout {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.badberg-footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-content: flex-start;
+
+    a {
+        text-decoration: none;
+    }
+}
+
+@media (max-width: 960px) {
+    .badberg-nav {
+        align-items: flex-start;
+    }
+
+    .badberg-nav-toggle {
+        display: inline-flex;
+    }
+
+    .badberg-nav-panel {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+
+        &.is-open {
+            display: flex;
+        }
+    }
+
+    .badberg-hero-grid,
+    .badberg-result-list,
+    .badberg-service-grid,
+    .badberg-process-list,
+    .badberg-trust-layout,
+    .badberg-about-card {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .badberg-shell {
+        width: min(100% - 1.25rem, 100%);
+    }
+
+    .badberg-hero {
+        padding-bottom: 3rem;
+    }
+
+    .badberg-hero-copy,
+    .badberg-tld-panel {
+        padding: 1.5rem;
+    }
+
+    .badberg-domain-form {
+        grid-template-columns: 1fr;
+    }
+
+    .badberg-result-card,
+    .badberg-page-footer-layout {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .badberg-tld-grid {
+        grid-template-columns: 1fr;
+    }
+}

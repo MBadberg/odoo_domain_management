@@ -37,7 +37,14 @@ Features (MVP):
         'views/domain_api_test_views.xml',
         'views/res_config_settings_views.xml',
         'views/portal_templates.xml',
+        'views/website_templates.xml',
     ],
+    'assets': {
+        'web.assets_frontend': [
+            'odoo_domain_management/static/src/scss/website_home.scss',
+            'odoo_domain_management/static/src/js/website_home.js',
+        ],
+    },
     'installable': True,
     'application': True,
     'license': 'LGPL-3',

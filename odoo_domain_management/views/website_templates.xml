@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="website_homepage_badberg" name="Badberg Domain Homepage" inherit_id="website.homepage">
+        <xpath expr="//div[@id='wrap']" position="replace">
+            <div id="wrap" class="oe_structure badberg-homepage">
+                <header class="badberg-hero" id="start">
+                    <div class="badberg-shell">
+                        <nav class="badberg-nav" aria-label="Primäre Navigation">
+                            <a href="#start" class="badberg-brand">
+                                <span class="badberg-brand-mark">BADBERG</span>
+                                <span class="badberg-brand-subline">Domains, Hosting &amp; IT-Service</span>
+                            </a>
+                            <button type="button"
+                                    class="badberg-nav-toggle"
+                                    data-domain-nav-toggle="1"
+                                    aria-expanded="false"
+                                    aria-controls="badberg-nav-panel">
+                                Menü
+                            </button>
+                            <div class="badberg-nav-panel" id="badberg-nav-panel" data-domain-nav-panel="1">
+                                <a href="#start">Start</a>
+                                <a href="#domains">Domains</a>
+                                <a href="#hosting-email">Hosting</a>
+                                <a href="#it-service">IT-Service</a>
+                                <a href="/blog">Blog</a>
+                                <a href="#contact">Kontakt</a>
+                                <a href="/web/login" class="badberg-nav-cta">Kundenlogin</a>
+                            </div>
+                        </nav>
+
+                        <div class="badberg-hero-grid">
+                            <div class="badberg-hero-copy">
+                                <p class="badberg-eyebrow">Domains, Hosting &amp; IT-Service aus einer Hand</p>
+                                <h1>Deine Domain. Dein Hosting. Persönlicher IT-Service.</h1>
+                                <p class="badberg-lead">
+                                    Starte mit einer passenden Domain und kombiniere sie direkt mit Hosting,
+                                    E-Mail, DNS-Unterstützung und persönlicher Betreuung statt anonymer Hotline.
+                                </p>
+
+                                <form class="badberg-domain-form"
+                                      action="#domain-results"
+                                      method="get"
+                                      data-domain-mockup-form="1">
+                                    <label class="badberg-sr-only" for="badberg-domain-input">Wunschdomain</label>
+                                    <input id="badberg-domain-input"
+                                           name="domain"
+                                           type="text"
+                                           placeholder="ihre-wunschdomain.de"
+                                           autocomplete="off"
+                                           required="required"/>
+                                    <button type="submit">Verfügbarkeit prüfen</button>
+                                </form>
+
+                                <p class="badberg-note">
+                                    Demo-Mockup mit simulierten Suchergebnissen. Echte Registrar- oder Provider-Zugangsdaten
+                                    sind nicht eingebunden.
+                                </p>
+
+                                <div class="badberg-inline-points" aria-label="Badberg Vorteile">
+                                    <span>19+ Jahre Erfahrung</span>
+                                    <span>Persönlicher Ansprechpartner</span>
+                                    <span>Remote &amp; vor Ort</span>
+                                </div>
+
+                                <div class="badberg-hero-actions">
+                                    <a href="#domain-results" class="badberg-button badberg-button-primary">Domain-Ideen ansehen</a>
+                                    <a href="/web/login" class="badberg-button badberg-button-secondary">Zum Kundenlogin</a>
+                                </div>
+                            </div>
+
+                            <aside class="badberg-tld-panel" aria-labelledby="badberg-tld-title">
+                                <div class="badberg-panel-header">
+                                    <p class="badberg-panel-kicker">Beliebte Endungen</p>
+                                    <h2 id="badberg-tld-title">TLD-Preise &amp; Hinweise</h2>
+                                </div>
+                                <div class="badberg-tld-grid">
+                                    <article class="badberg-tld-card">
+                                        <h3>.de</h3>
+                                        <p>ab 12,00 € / Jahr</p>
+                                        <span>Ideal für den deutschen Markt</span>
+                                    </article>
+                                    <article class="badberg-tld-card">
+                                        <h3>.com</h3>
+                                        <p>ab 14,00 € / Jahr</p>
+                                        <span>International bekannt und etabliert</span>
+                                    </article>
+                                    <article class="badberg-tld-card">
+                                        <h3>.eu</h3>
+                                        <p>ab 9,00 € / Jahr</p>
+                                        <span>Für europaweite Sichtbarkeit</span>
+                                    </article>
+                                    <article class="badberg-tld-card">
+                                        <h3>.net</h3>
+                                        <p>ab 13,00 € / Jahr</p>
+                                        <span>Stark für Technik und Infrastruktur</span>
+                                    </article>
+                                    <article class="badberg-tld-card">
+                                        <h3>.online</h3>
+                                        <p>ab 4,99 € / Jahr</p>
+                                        <span>Auffällig für neue digitale Marken</span>
+                                    </article>
+                                </div>
+                            </aside>
+                        </div>
+                    </div>
+                </header>
+
+                <section class="badberg-section" id="domains">
+                        <div class="badberg-shell">
+                            <div class="badberg-section-heading">
+                                <p class="badberg-eyebrow">Domainchecker im Fokus</p>
+                                <h2>Beispielhafte Verfügbarkeitsprüfung mit klaren Zuständen</h2>
+                                <p>
+                                    So kann die Startseite verfügbare und bereits vergebene Domains darstellen,
+                                    inklusive Handlungsoptionen für Registrierung oder Alternativen.
+                                </p>
+                            </div>
+
+                            <div class="badberg-result-list"
+                                 id="domain-results"
+                                 aria-live="polite"
+                                 data-domain-mockup-results="1">
+                                <article class="badberg-result-card is-available">
+                                    <div>
+                                        <p class="badberg-result-label">Verfügbar</p>
+                                        <h3>beispielprojekt.de</h3>
+                                        <p>12,00 € / Jahr · Domainregistrierung mit DNS-Unterstützung</p>
+                                    </div>
+                                    <a href="/web/login?redirect=/my/domains/check" class="badberg-result-action">Registrieren</a>
+                                </article>
+                                <article class="badberg-result-card is-unavailable">
+                                    <div>
+                                        <p class="badberg-result-label">Bereits vergeben</p>
+                                        <h3>beispielprojekt.com</h3>
+                                        <p>Nicht mehr frei. Prüfe alternative Schreibweisen oder andere TLDs.</p>
+                                    </div>
+                                    <button type="button"
+                                            class="badberg-result-action badberg-result-action-secondary"
+                                            data-domain-suggestion="beispielprojekt">
+                                        Alternative suchen
+                                    </button>
+                                </article>
+                                <article class="badberg-result-card is-available">
+                                    <div>
+                                        <p class="badberg-result-label">Alternative verfügbar</p>
+                                        <h3>beispielprojekt.eu</h3>
+                                        <p>9,00 € / Jahr · Gute Ergänzung für europaweite Präsenz</p>
+                                    </div>
+                                    <a href="/web/login?redirect=/my/domains/check" class="badberg-result-action">Registrieren</a>
+                                </article>
+                                <article class="badberg-result-card is-available">
+                                    <div>
+                                        <p class="badberg-result-label">Alternative verfügbar</p>
+                                        <h3>beispielprojekt.net</h3>
+                                        <p>13,00 € / Jahr · Besonders passend für technische Angebote</p>
+                                    </div>
+                                    <a href="/web/login?redirect=/my/domains/check" class="badberg-result-action">Registrieren</a>
+                                </article>
+                            </div>
+                        </div>
+                </section>
+
+                <section class="badberg-section badberg-section-soft" id="hosting-email">
+                        <div class="badberg-shell">
+                            <div class="badberg-section-heading">
+                                <p class="badberg-eyebrow">Leistungsbereiche</p>
+                                <h2>Alles für eine professionelle Online-Präsenz</h2>
+                            </div>
+                            <div class="badberg-service-grid">
+                                <article class="badberg-service-card">
+                                    <span class="badberg-service-icon" aria-hidden="true">01</span>
+                                    <h3>Domain</h3>
+                                    <p>Registrierung, Transfers, DNS-Betreuung und verständliche Unterstützung bei der Auswahl passender Endungen.</p>
+                                </article>
+                                <article class="badberg-service-card">
+                                    <span class="badberg-service-icon" aria-hidden="true">02</span>
+                                    <h3>Hosting &amp; E-Mail</h3>
+                                    <p>Webspace, SSL und Postfächer passend zur Domain – kompakt geplant und technisch sauber umgesetzt.</p>
+                                </article>
+                                <article class="badberg-service-card" id="it-service">
+                                    <span class="badberg-service-icon" aria-hidden="true">03</span>
+                                    <h3>IT-Service</h3>
+                                    <p>Persönlicher Support für kleine Unternehmen und Privatkunden – remote oder direkt vor Ort.</p>
+                                </article>
+                            </div>
+                        </div>
+                </section>
+
+                <section class="badberg-section">
+                        <div class="badberg-shell badberg-trust-layout">
+                            <div class="badberg-section-heading">
+                                <p class="badberg-eyebrow">Warum Badberg</p>
+                                <h2>Technische Betreuung mit persönlichem Ansprechpartner</h2>
+                            </div>
+                            <ul class="badberg-trust-list">
+                                <li>19+ Jahre Erfahrung in IT, Infrastruktur und kundennahem Support</li>
+                                <li>Persönlicher Ansprechpartner statt anonymer Hotline</li>
+                                <li>Remote &amp; vor Ort für schnelle Hilfe und saubere Umsetzung</li>
+                                <li>DNS-Unterstützung für Umzüge, Mail und Webprojekte</li>
+                                <li>Domain + Hosting aus einer Hand mit realistisch nachbaubarer Odoo-Oberfläche</li>
+                            </ul>
+                        </div>
+                </section>
+
+                <section class="badberg-section badberg-section-soft">
+                        <div class="badberg-shell">
+                            <div class="badberg-section-heading">
+                                <p class="badberg-eyebrow">So läuft es ab</p>
+                                <h2>Anfrage senden → besprechen → Lösung erhalten</h2>
+                            </div>
+                            <ol class="badberg-process-list">
+                                <li>
+                                    <strong>1. Anfrage senden</strong>
+                                    <span>Domainwunsch, Hostingbedarf oder IT-Thema kurz schildern.</span>
+                                </li>
+                                <li>
+                                    <strong>2. Besprechen</strong>
+                                    <span>Gemeinsam die passende Domain-, Hosting- oder Service-Lösung abstimmen.</span>
+                                </li>
+                                <li>
+                                    <strong>3. Lösung erhalten</strong>
+                                    <span>Registrierung, Einrichtung und technische Unterstützung aus einer Hand bekommen.</span>
+                                </li>
+                            </ol>
+                        </div>
+                </section>
+
+                <section class="badberg-section">
+                        <div class="badberg-shell badberg-about-card">
+                            <div>
+                                <p class="badberg-eyebrow">Persönliche Betreuung</p>
+                                <h2>Kompakte Betreuung statt Callcenter-Prozess</h2>
+                            </div>
+                            <p>
+                                Badberg verbindet Domain- und Hosting-Themen mit persönlichem IT-Service. Das Mockup setzt
+                                deshalb bewusst auf klare Sprache, übersichtliche Karten und direkte Kontaktmöglichkeiten –
+                                passend für eine spätere Umsetzung in Odoo 19 CE.
+                            </p>
+                            <a href="#contact" class="badberg-button badberg-button-secondary">Kontakt aufnehmen</a>
+                        </div>
+                </section>
+
+                <section class="badberg-section badberg-section-soft" id="faq">
+                        <div class="badberg-shell">
+                            <div class="badberg-section-heading">
+                                <p class="badberg-eyebrow">FAQ</p>
+                                <h2>Häufige Fragen zum Domain-Start</h2>
+                            </div>
+                            <div class="badberg-faq-list">
+                                <details open="open">
+                                    <summary>Ist der Domainchecker bereits live mit einem Registrar verbunden?</summary>
+                                    <p>Nein. Dieses Frontend-Mockup zeigt bewusst simulierte Ergebniskarten ohne echte Provider-Zugangsdaten.</p>
+                                </details>
+                                <details>
+                                    <summary>Kann daraus später ein echter Domainchecker werden?</summary>
+                                    <p>Ja. Die Suchlogik kann später an einen öffentlichen Website-Controller angebunden werden, der serverseitig den bestehenden Domainrobot-Client verwendet.</p>
+                                </details>
+                                <details>
+                                    <summary>Ist die Oberfläche auch für Mobilgeräte gedacht?</summary>
+                                    <p>Ja. Navigation, Hero, Karten und Ergebnislisten sind für Desktop und Mobil responsive angelegt.</p>
+                                </details>
+                            </div>
+                        </div>
+                </section>
+
+                <footer class="badberg-page-footer" id="contact">
+                        <div class="badberg-shell badberg-page-footer-layout">
+                            <div>
+                                <a href="#start" class="badberg-brand">
+                                    <span class="badberg-brand-mark">BADBERG</span>
+                                    <span class="badberg-brand-subline">Domains, Hosting &amp; IT-Service aus einer Hand</span>
+                                </a>
+                                <p>Für Domain, Hosting, DNS und IT-Service mit persönlicher Betreuung.</p>
+                            </div>
+                            <div class="badberg-footer-links">
+                                <a href="#domains">Domains</a>
+                                <a href="#hosting-email">Hosting</a>
+                                <a href="#it-service">IT-Service</a>
+                                <a href="/blog">Blog</a>
+                                <a href="/contactus">Kontakt</a>
+                                <a href="/web/login">Kundenlogin</a>
+                            </div>
+                        </div>
+                </footer>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

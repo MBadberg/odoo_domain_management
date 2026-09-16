@@ -14,6 +14,7 @@ An **Odoo 19 Community** module that integrates with the [united-domains Reselli
 | Customer portal – "My Domains" list | ✅ |
 | Customer portal – domain detail page | ✅ |
 | Customer portal – register new domain | ✅ |
+| Responsive website homepage mockup for badberg.online | ✅ |
 | Admin settings for API credentials | ✅ |
 | Backend views (orders & managed domains) | ✅ |
 | Record rules (portal users see only own records) | ✅ |
@@ -27,6 +28,14 @@ An **Odoo 19 Community** module that integrates with the [united-domains Reselli
 1. Copy the `odoo_domain_management` folder into your Odoo `addons` directory.
 2. Restart the Odoo server.
 3. Go to **Apps**, search for *Domain Management*, and click **Install**.
+
+### Update an existing installation
+
+If the module is already installed, update it so the homepage template and frontend assets are loaded:
+
+```bash
+odoo-bin -d <your_database> -u odoo_domain_management
+```
 
 ---
 
@@ -72,6 +81,15 @@ The module now includes a lightweight sync layer that keeps Odoo and Domainrobot
 Cron jobs are available under **Settings → Technical → Automation** for contacts, domains, transfers, and account status sync. They are disabled by default and can be enabled once API credentials are configured.
 
 ## How to use
+
+### Homepage mockup
+
+- The website start page is overridden via `views/website_templates.xml`.
+- The domain checker in the hero uses **simulated example data** from `static/src/js/website_home.js`.
+- No real registrar credentials are embedded in the frontend mockup.
+- The responsive styling lives in `static/src/scss/website_home.scss`.
+- After updating the module, open the website root URL (`/`) to see the mockup.
+- The later provider integration point should be a **public website controller** in `controllers/portal.py` (or a dedicated website controller) that calls `services/domainrobot_client.py` server-side and returns safe JSON to the frontend.
 
 ### Check domain availability (Admin / Portal)
 
