@@ -86,6 +86,7 @@ Cron jobs are available under **Settings → Technical → Automation** for cont
 
 - The website start page is overridden via `views/website_templates.xml`.
 - The domain checker in the hero uses **simulated example data** from `static/src/js/website_home.js`.
+- Result CTAs on the public homepage currently lead visitors into a public contact/request step, while the existing authenticated portal flow remains available under `/my/domains/check`.
 - No real registrar credentials are embedded in the frontend mockup.
 - The responsive styling lives in `static/src/scss/website_home.scss`.
 - After updating the module, open the website root URL (`/`) to see the mockup.

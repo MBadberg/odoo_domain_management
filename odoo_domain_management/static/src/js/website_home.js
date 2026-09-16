@@ -70,12 +70,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (variant.available) {
                 var registerLink = document.createElement('a');
-                registerLink.href = '/my/domains/check?domain_name='
-                    + encodeURIComponent(base)
-                    + '&tlds='
-                    + encodeURIComponent(variant.tld);
+                registerLink.href = '#contact';
                 registerLink.className = 'badberg-result-action';
-                registerLink.textContent = 'Weiter zum Check';
+                registerLink.textContent = 'Registrierung anfragen';
                 article.appendChild(registerLink);
             } else {
                 var suggestionButton = document.createElement('button');
