@@ -21,6 +21,10 @@ _logger = logging.getLogger(__name__)
 class DomainPortalController(CustomerPortal):
     """Extends the Odoo customer portal with domain management pages."""
 
+    def _get_supported_tlds(self):
+        """Return the TLDs supported by the portal availability checker."""
+        return ['de', 'com', 'eu', 'net', 'org', 'info', 'biz', 'online']
+
     def _get_portal_partner(self):
         """Return the current user's partner record if it exists and is valid."""
         user = getattr(request.env, 'user', False)
@@ -99,15 +103,19 @@ class DomainPortalController(CustomerPortal):
     @http.route('/my/domains/check', type='http', auth='user', website=True, methods=['GET'])
     def portal_check_form(self, domain_name='', **kw):
         """Render the availability check form."""
-        available_tlds = ['de', 'com', 'net', 'org', 'info', 'biz']
-        selected_tlds = [t.strip() for t in (kw.get('tlds') or '').split(',') if t.strip()]
+        available_tlds = self._get_supported_tlds()
+        selected_tlds = [
+            t.strip()
+            for t in (kw.get('tlds') or '').split(',')
+            if t.strip() in available_tlds
+        ]
         domain_name = (domain_name or '').strip().lower()
 
         if not selected_tlds and '.' in domain_name:
-            parts = [part for part in domain_name.split('.') if part]
-            if len(parts) > 1 and parts[-1] in available_tlds:
-                selected_tlds = [parts[-1]]
-                domain_name = '.'.join(parts[:-1])
+            base_name, domain_tld = domain_name.rsplit('.', 1)
+            if domain_tld in available_tlds:
+                selected_tlds = [domain_tld]
+                domain_name = base_name
 
         return request.render(
             'odoo_domain_management.portal_check_domain',
@@ -129,6 +137,8 @@ class DomainPortalController(CustomerPortal):
         """
         results = []
         error = None
+        supported_tlds = self._get_supported_tlds()
+        selected_tlds = [t.strip() for t in (tlds or '').split(',') if t.strip() in supported_tlds]
 
         domain_name = (domain_name or '').strip().lower()
         if not domain_name:
@@ -142,8 +152,6 @@ class DomainPortalController(CustomerPortal):
                 client = DomainrobotClient.from_system_params(request.env)
 
                 # Multi-TLD check when a comma-separated list of TLDs is given
-                selected_tlds = [t.strip() for t in (tlds or '').split(',') if t.strip()]
-
                 if selected_tlds:
                     # Strip any existing TLD from the input before appending
                     base = domain_name.split('.')[0]
@@ -182,7 +190,8 @@ class DomainPortalController(CustomerPortal):
             'odoo_domain_management.portal_check_domain',
             {
                 'page_name': 'domain',
-                'tlds': ['de', 'com', 'net', 'org', 'info', 'biz'],
+                'tlds': supported_tlds,
+                'selected_tlds': selected_tlds or supported_tlds,
                 'domain_name': domain_name,
                 'results': results,
                 'error': error,

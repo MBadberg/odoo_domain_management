@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var input = homepage.querySelector('#badberg-domain-input');
     var results = homepage.querySelector('[data-domain-mockup-results]');
     var supportedTlds = ['de', 'com', 'eu', 'net', 'online'];
+    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var variants = [
         {tld: 'de', available: true, price: '12,00 € / Jahr', detail: 'Domainregistrierung mit DNS-Unterstützung'},
         {tld: 'com', available: false, price: null, detail: 'Nicht mehr frei. Prüfe alternative Schreibweisen oder andere TLDs.'},
@@ -93,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
         form.addEventListener('submit', function (event) {
             event.preventDefault();
             renderResults(normalizeBase(input.value));
-            results.scrollIntoView({behavior: 'smooth', block: 'start'});
+            results.scrollIntoView({behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start'});
             results.focus();
         });
 
