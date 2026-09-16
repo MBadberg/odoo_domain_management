@@ -4,8 +4,6 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    document.body.classList.add('badberg-homepage-active');
-
     var navToggle = document.querySelector('[data-domain-nav-toggle]');
     var navPanel = document.querySelector('[data-domain-nav-panel]');
     if (navToggle && navPanel) {
@@ -41,31 +39,45 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!results) {
             return;
         }
-        results.innerHTML = variants.map(function (variant) {
+        results.replaceChildren();
+        variants.forEach(function (variant) {
             var domain = base + '.' + variant.tld;
+            var article = document.createElement('article');
+            article.className = 'badberg-result-card ' + (variant.available ? 'is-available' : 'is-unavailable');
+
+            var content = document.createElement('div');
+            var label = document.createElement('p');
+            label.className = 'badberg-result-label';
+            label.textContent = variant.available ? 'Verfügbar' : 'Bereits vergeben';
+
+            var title = document.createElement('h3');
+            title.textContent = domain;
+
+            var detail = document.createElement('p');
+            detail.textContent = variant.available ? variant.price + ' · ' + variant.detail : variant.detail;
+
+            content.appendChild(label);
+            content.appendChild(title);
+            content.appendChild(detail);
+            article.appendChild(content);
+
             if (variant.available) {
-                return (
-                    '<article class="badberg-result-card is-available">' +
-                        '<div>' +
-                            '<p class="badberg-result-label">Verfügbar</p>' +
-                            '<h3>' + domain + '</h3>' +
-                            '<p>' + variant.price + ' · ' + variant.detail + '</p>' +
-                        '</div>' +
-                        '<a href="/web/login?redirect=/my/domains/check" class="badberg-result-action">Registrieren</a>' +
-                    '</article>'
-                );
+                var registerLink = document.createElement('a');
+                registerLink.href = '/web/login?redirect=/my/domains/check';
+                registerLink.className = 'badberg-result-action';
+                registerLink.textContent = 'Registrieren';
+                article.appendChild(registerLink);
+            } else {
+                var suggestionButton = document.createElement('button');
+                suggestionButton.type = 'button';
+                suggestionButton.className = 'badberg-result-action badberg-result-action-secondary';
+                suggestionButton.setAttribute('data-domain-suggestion', base);
+                suggestionButton.textContent = 'Alternative suchen';
+                article.appendChild(suggestionButton);
             }
-            return (
-                '<article class="badberg-result-card is-unavailable">' +
-                    '<div>' +
-                        '<p class="badberg-result-label">Bereits vergeben</p>' +
-                        '<h3>' + domain + '</h3>' +
-                        '<p>' + variant.detail + '</p>' +
-                    '</div>' +
-                    '<button type="button" class="badberg-result-action badberg-result-action-secondary" data-domain-suggestion="' + base + '">Alternative suchen</button>' +
-                '</article>'
-            );
-        }).join('');
+
+            results.appendChild(article);
+        });
 
         bindSuggestionButtons();
     }

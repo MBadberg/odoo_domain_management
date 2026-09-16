@@ -11,20 +11,6 @@
     --badberg-danger: #b0334b;
 }
 
-body.badberg-homepage-active {
-    background: var(--badberg-bg);
-    color: var(--badberg-text);
-}
-
-body.badberg-homepage-active #top,
-body.badberg-homepage-active header#top,
-body.badberg-homepage-active #bottom,
-body.badberg-homepage-active footer#bottom,
-body.badberg-homepage-active #footer,
-body.badberg-homepage-active footer#footer {
-    display: none !important;
-}
-
 .badberg-homepage {
     background: linear-gradient(180deg, #ffffff 0%, var(--badberg-bg) 100%);
     color: var(--badberg-text);
