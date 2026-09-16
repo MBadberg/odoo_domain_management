@@ -127,7 +127,7 @@
                                         <h3>beispielprojekt.de</h3>
                                         <p>12,00 € / Jahr · Domainregistrierung mit DNS-Unterstützung</p>
                                     </div>
-                                    <a href="/my/domains/check" class="badberg-result-action">Registrieren</a>
+                                    <a href="/my/domains/check?domain_name=beispielprojekt.de" class="badberg-result-action">Registrieren</a>
                                 </article>
                                 <article class="badberg-result-card is-unavailable">
                                     <div>
@@ -147,7 +147,7 @@
                                         <h3>beispielprojekt.eu</h3>
                                         <p>9,00 € / Jahr · Gute Ergänzung für europaweite Präsenz</p>
                                     </div>
-                                    <a href="/my/domains/check" class="badberg-result-action">Registrieren</a>
+                                    <a href="/my/domains/check?domain_name=beispielprojekt.eu" class="badberg-result-action">Registrieren</a>
                                 </article>
                                 <article class="badberg-result-card is-available">
                                     <div>
@@ -155,7 +155,7 @@
                                         <h3>beispielprojekt.net</h3>
                                         <p>13,00 € / Jahr · Besonders passend für technische Angebote</p>
                                     </div>
-                                    <a href="/my/domains/check" class="badberg-result-action">Registrieren</a>
+                                    <a href="/my/domains/check?domain_name=beispielprojekt.net" class="badberg-result-action">Registrieren</a>
                                 </article>
                             </div>
                         </div>

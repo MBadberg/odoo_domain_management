@@ -129,6 +129,18 @@
     }
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .badberg-nav-cta,
+    .badberg-button,
+    .badberg-result-action {
+        transition: none;
+
+        &:hover {
+            transform: none;
+        }
+    }
+}
+
 .badberg-nav-cta,
 .badberg-button-primary,
 .badberg-result-action {

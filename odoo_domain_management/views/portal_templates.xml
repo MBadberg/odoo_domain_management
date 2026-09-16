@@ -175,7 +175,7 @@
                                            t-att-value="domain_name or ''"
                                            placeholder="e.g. mycompany"
                                            required="required"/>
-                                    <div class="form-text">Enter the name without the TLD extension.</div>
+                                    <div class="form-text">Enter the name with or without the TLD extension.</div>
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label">TLDs to check</label>

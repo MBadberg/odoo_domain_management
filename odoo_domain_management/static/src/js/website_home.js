@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (variant.available) {
                 var registerLink = document.createElement('a');
-                registerLink.href = '/my/domains/check';
+                registerLink.href = '/my/domains/check?domain_name=' + encodeURIComponent(domain);
                 registerLink.className = 'badberg-result-action';
                 registerLink.textContent = 'Registrieren';
                 article.appendChild(registerLink);

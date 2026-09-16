@@ -97,13 +97,14 @@ class DomainPortalController(CustomerPortal):
     # ── Availability check ────────────────────────────────────────────────────
 
     @http.route('/my/domains/check', type='http', auth='user', website=True, methods=['GET'])
-    def portal_check_form(self, **kw):
+    def portal_check_form(self, domain_name='', **kw):
         """Render the availability check form."""
         return request.render(
             'odoo_domain_management.portal_check_domain',
             {
                 'page_name': 'domain',
                 'tlds': ['de', 'com', 'net', 'org', 'info', 'biz'],
+                'domain_name': (domain_name or '').strip().lower(),
             },
         )
 
