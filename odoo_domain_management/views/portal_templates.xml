@@ -175,7 +175,7 @@
                                            t-att-value="domain_name or ''"
                                            placeholder="e.g. mycompany"
                                            required="required"/>
-                                    <div class="form-text">Enter the name with or without the TLD extension.</div>
+                                    <div class="form-text">Enter the name without the TLD extension.</div>
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label">TLDs to check</label>
@@ -186,7 +186,7 @@
                                                        type="checkbox"
                                                        t-att-id="'tld_' + tld"
                                                        t-att-value="tld"
-                                                       checked="checked"/>
+                                                       t-att-checked="'checked' if tld in (selected_tlds or []) else None"/>
                                                 <label class="form-check-label"
                                                        t-att-for="'tld_' + tld">
                                                     .<t t-esc="tld"/>

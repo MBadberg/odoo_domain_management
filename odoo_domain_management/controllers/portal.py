@@ -99,12 +99,23 @@ class DomainPortalController(CustomerPortal):
     @http.route('/my/domains/check', type='http', auth='user', website=True, methods=['GET'])
     def portal_check_form(self, domain_name='', **kw):
         """Render the availability check form."""
+        available_tlds = ['de', 'com', 'net', 'org', 'info', 'biz']
+        selected_tlds = [t.strip() for t in (kw.get('tlds') or '').split(',') if t.strip()]
+        domain_name = (domain_name or '').strip().lower()
+
+        if not selected_tlds and '.' in domain_name:
+            parts = [part for part in domain_name.split('.') if part]
+            if len(parts) > 1 and parts[-1] in available_tlds:
+                selected_tlds = [parts[-1]]
+                domain_name = '.'.join(parts[:-1])
+
         return request.render(
             'odoo_domain_management.portal_check_domain',
             {
                 'page_name': 'domain',
-                'tlds': ['de', 'com', 'net', 'org', 'info', 'biz'],
-                'domain_name': (domain_name or '').strip().lower(),
+                'tlds': available_tlds,
+                'selected_tlds': selected_tlds or available_tlds,
+                'domain_name': domain_name,
             },
         )
 

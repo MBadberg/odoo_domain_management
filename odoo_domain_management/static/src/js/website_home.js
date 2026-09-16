@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var form = homepage.querySelector('[data-domain-mockup-form]');
     var input = homepage.querySelector('#badberg-domain-input');
     var results = homepage.querySelector('[data-domain-mockup-results]');
+    var supportedTlds = ['de', 'com', 'eu', 'net', 'online'];
     var variants = [
         {tld: 'de', available: true, price: '12,00 € / Jahr', detail: 'Domainregistrierung mit DNS-Unterstützung'},
         {tld: 'com', available: false, price: null, detail: 'Nicht mehr frei. Prüfe alternative Schreibweisen oder andere TLDs.'},
@@ -31,12 +32,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!normalized) {
             return 'ihre-wunschdomain';
         }
-        var parts = normalized.split('.').filter(Boolean);
-        if (parts.length > 1) {
-            parts.pop();
-            return parts.join('.');
+        var matchingTld = supportedTlds.find(function (tld) {
+            return normalized.endsWith('.' + tld);
+        });
+        if (matchingTld) {
+            return normalized.slice(0, -(matchingTld.length + 1));
         }
-        return normalized;
+        return normalized.includes('.') ? normalized.split('.')[0] : normalized;
     }
 
     function renderResults(base) {
@@ -67,9 +69,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (variant.available) {
                 var registerLink = document.createElement('a');
-                registerLink.href = '/my/domains/check?domain_name=' + encodeURIComponent(domain);
+                registerLink.href = '/my/domains/check?domain_name='
+                    + encodeURIComponent(base)
+                    + '&tlds='
+                    + encodeURIComponent(variant.tld);
                 registerLink.className = 'badberg-result-action';
-                registerLink.textContent = 'Registrieren';
+                registerLink.textContent = 'Weiter zum Check';
                 article.appendChild(registerLink);
             } else {
                 var suggestionButton = document.createElement('button');
@@ -89,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
             event.preventDefault();
             renderResults(normalizeBase(input.value));
             results.scrollIntoView({behavior: 'smooth', block: 'start'});
+            results.focus();
         });
 
         results.addEventListener('click', function (event) {

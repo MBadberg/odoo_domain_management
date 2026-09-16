@@ -1,4 +1,4 @@
-:root {
+.badberg-homepage {
     --badberg-bg: #f5f7fb;
     --badberg-surface: #ffffff;
     --badberg-surface-soft: #eef3fb;
@@ -9,9 +9,6 @@
     --badberg-accent-dark: #173caa;
     --badberg-success: #117a4f;
     --badberg-danger: #b0334b;
-}
-
-.badberg-homepage {
     background: linear-gradient(180deg, #ffffff 0%, var(--badberg-bg) 100%);
     color: var(--badberg-text);
 
