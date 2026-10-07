@@ -112,7 +112,7 @@ class ResConfigSettings(models.TransientModel):
         if 'github.com/' not in repo_url:
             return False, _('The repository URL must point to GitHub.')
         repo_path = repo_url.split('github.com/', 1)[1]
-        parts = [p.rstrip('.git') for p in repo_path.split('/') if p]
+        parts = [p.removesuffix('.git') for p in repo_path.split('/') if p]
         if len(parts) < 2:
             return False, _('GitHub URL must have the form https://github.com/<owner>/<repository>.')
         return parts[0], parts[1]
