@@ -45,8 +45,7 @@ class ResConfigSettings(models.TransientModel):
     module_version = fields.Char(
         string='Installed version',
         readonly=True,
-        default='19.0.1.1.0',
-        help='Current version of this Odoo addon as defined in the module manifest.',
+        default=lambda self: self._get_current_module_version(),
     )
     github_repository_url = fields.Char(
         string='GitHub repository URL',
