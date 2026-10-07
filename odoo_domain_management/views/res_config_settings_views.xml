@@ -24,6 +24,28 @@
                             <field name="domainrobot_api_timeout"/>
                         </setting>
                     </block>
+
+                    <block title="GitHub update">
+                        <setting id="domainrobot_module_version_setting" string="Installed version">
+                            <field name="module_version" readonly="1"/>
+                        </setting>
+                        <setting id="domainrobot_github_repository_setting" string="GitHub repository URL">
+                            <field name="github_repository_url" placeholder="https://github.com/MBadberg/odoo_domain_management"/>
+                        </setting>
+                        <setting id="domainrobot_github_branch_setting" string="GitHub update branch">
+                            <field name="github_update_branch" placeholder="main"/>
+                        </setting>
+                        <setting id="domainrobot_github_latest_version_setting" string="Latest GitHub version">
+                            <field name="github_latest_version" readonly="1"/>
+                        </setting>
+                        <setting id="domainrobot_github_update_check_setting" string="Update status">
+                            <field name="github_update_available" readonly="1"/>
+                        </setting>
+                        <div class="mt8">
+                            <button name="action_check_github_update" type="object" string="Check GitHub update" class="btn-secondary"/>
+                            <button name="action_update_from_github" type="object" string="Update from GitHub" class="btn-primary" attrs="{'invisible': [('github_update_available', '=', False)]}"/>
+                        </div>
+                    </block>
                 </app>
             </xpath>
         </field>
