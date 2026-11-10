@@ -72,8 +72,8 @@ class SaleOrder(models.Model):
             'product_id': product.id,
             'name': domain_name,
             'product_uom_qty': 1.0,
-            'product_uom': product.uom_id.id,
-            'tax_id': [(6, 0, taxes.ids)],
+            'product_uom_id': product.uom_id.id,
+            'tax_ids': [(6, 0, taxes.ids)],
             'domain_name': domain_name,
             'domain_operation': operation,
         }
