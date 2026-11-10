@@ -133,12 +133,49 @@ class ResConfigSettings(models.TransientModel):
         try:
             with urlopen(request, timeout=15) as response:
                 payload = json.loads(response.read().decode('utf-8'))
-        except (HTTPError, URLError, ValueError):
+            tag = (payload.get('tag_name') or '').strip()
+            if tag:
+                return tag, False
+        except HTTPError:
+            # A 404 (no GitHub Release) is expected for repos that only use
+            # plain git tags — fall through to the tag lookup below.
+            pass
+        except (URLError, ValueError):
             return False, _('Could not read the GitHub release metadata for this repository.')
-        tag = (payload.get('tag_name') or '').strip()
-        if not tag:
-            return False, _('No GitHub release tag was found for this repository.')
-        return tag, False
+
+        # Fall back to the latest version tag on the remote (git tags are the
+        # documented release mechanism for this module).
+        tag = self._latest_remote_tag()
+        if tag:
+            return tag, False
+        return False, _(
+            'No GitHub release or git tag was found for this repository. '
+            'Create a release or push a version tag (e.g. "19.0.2.2.0") so the updater can detect the version.'
+        )
+
+    @staticmethod
+    def _parse_remote_tags(output):
+        """Return the tag names from a ``git ls-remote --tags`` output."""
+        tags = []
+        for line in (output or '').splitlines():
+            parts = line.split()
+            if not parts:
+                continue
+            tag = parts[-1].removeprefix('refs/tags/')
+            if tag and not tag.endswith('^{}'):
+                tags.append(tag)
+        return tags
+
+    def _latest_remote_tag(self):
+        """Return the highest version tag on origin, or '' if there are none."""
+        try:
+            output = self._run_git_command(['ls-remote', '--tags', 'origin'])
+        except UserError:
+            return ''
+        tags = self._parse_remote_tags(output)
+        if not tags:
+            return ''
+        return sorted(tags, key=lambda t: self._normalize_version(t) or [0])[-1]
 
     def _get_current_module_version(self):
         get_module_info = getattr(self.env['ir.module.module'], '_get_module_info', None)
@@ -153,13 +190,22 @@ class ResConfigSettings(models.TransientModel):
             return '19.0.1.1.0'
 
     def _git_repo_root(self):
-        module_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        repo_root = os.path.dirname(module_dir)
-        if os.path.isdir(os.path.join(repo_root, '.git')):
-            return repo_root
-        if os.path.isdir(os.path.join(module_dir, '.git')):
-            return module_dir
-        return repo_root
+        """Return the git repository root, walking up from this file's directory.
+
+        Works for both layouts: a nested addon folder inside a repo, and the
+        flat layout where the addon itself is the repository root (the ``.git``
+        directory lives inside the addon folder).
+        """
+        current = os.path.dirname(os.path.abspath(__file__))
+        for _ in range(8):
+            if os.path.isdir(os.path.join(current, '.git')) or os.path.isfile(os.path.join(current, '.git')):
+                return current
+            parent = os.path.dirname(current)
+            if parent == current:
+                break
+            current = parent
+        # Fallback: the addon's own directory (flat repo layout).
+        return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     def _run_git_command(self, arguments):
         repo_root = self._git_repo_root()
@@ -208,7 +254,9 @@ class ResConfigSettings(models.TransientModel):
         self._run_git_command(['pull', '--ff-only', 'origin', branch])
         self.env['ir.module.module'].search([('name', '=', 'odoo_domain_management')]).button_immediate_upgrade()
         self.installed_version = self._get_current_module_version()
-        self.github_latest_version = self._fetch_latest_github_version()[0]
+        latest_version, _error = self._fetch_latest_github_version()
+        if latest_version:
+            self.github_latest_version = latest_version
         self.github_update_available = False
         self.github_last_check = fields.Datetime.now()
         return {'type': 'ir.actions.act_window_close'}
