@@ -17,9 +17,10 @@ class DomainTld(models.Model):
     _name = 'domain.tld'
     _description = 'Domain TLD'
     _order = 'sequence, name'
-    _sql_constraints = [
-        ('name_uniq', 'unique(name)', 'A TLD entry already exists for this extension.'),
-    ]
+    _name_uniq = models.Constraint(
+        'unique (name)',
+        'A TLD entry already exists for this extension.',
+    )
 
     DEFAULT_TLDS = [
         # name, registration price, renewal price, transfer price
