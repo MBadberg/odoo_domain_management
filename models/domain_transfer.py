@@ -2,6 +2,7 @@
 import logging
 
 from odoo import fields, models, _
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -89,3 +90,35 @@ class DomainTransfer(models.Model):
 
     def action_sync_domainrobot(self):
         return self.action_sync_from_api()
+
+    def action_request_transfer(self, authcode=''):
+        """Request an incoming transfer for this domain at the registry."""
+        self.ensure_one()
+        client = self._get_client()
+        # Best-effort pre-check: surface a clear message when the domain is locked.
+        try:
+            check = client.check_domain_transfer(self.name)
+            if check.get('code') == '219':
+                raise UserError(
+                    _('This domain is locked at the current registrar and cannot be transferred.'))
+        except UserError:
+            raise
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+        result = client.transfer_domain(self.name, action='REQUEST', auth=(authcode or ''))
+        code = result.get('code')
+        description = result.get('description', '')
+        if code == '200':
+            self.write({
+                'status': 'pending',
+                'api_response_code': code,
+                'api_response_message': description,
+            })
+            self.message_post(body=_('Transfer requested for %s.') % self.name)
+            return True
+        if code == '531':
+            self.write({'status': 'failed', 'api_response_code': code, 'api_response_message': description})
+            raise UserError(_('Authorization failed – the Auth-Info code is wrong or missing.'))
+        self.write({'status': 'failed', 'api_response_code': code, 'api_response_message': description})
+        raise UserError(_('Transfer request failed – API code %s: %s') % (code, description))

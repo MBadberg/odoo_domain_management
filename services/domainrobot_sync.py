@@ -384,15 +384,12 @@ class DomainrobotSyncService:
             client = self._get_client()
             result = client.status_user()
             properties = result.get('properties', {}) or {}
-            balance = 0.0
-            if properties.get('BALANCE'):
-                try:
-                    balance = float(properties['BALANCE'][0])
-                except (TypeError, ValueError, IndexError):
-                    balance = 0.0
-            company_name = ''
-            if properties.get('COMPANY'):
-                company_name = str(properties['COMPANY'][0])
+            balance_raw = self._first_property_value(result, 'ACCOUNT CURRENT')
+            try:
+                balance = float(balance_raw) if balance_raw else 0.0
+            except (TypeError, ValueError):
+                balance = 0.0
+            company_name = self._first_property_value(result, 'USER', 'PARENT USER')
             now = fields.Datetime.now()
             account.with_context(skip_domainrobot_sync=True).write({
                 'api_response_code': result.get('code', ''),
@@ -415,6 +412,76 @@ class DomainrobotSyncService:
                 'needs_sync': True,
             })
         return account
+
+    PRICE_RELATION_PREFIX = 'PRICE_CLASS_DOMAIN_'
+
+    def _parse_price_relations(self, result):
+        """Parse StatusUser RELATION TYPE/VALUE into ``{tld: {annual, setup, transfer, currency}}``.
+
+        The Domainrobot ``statusUser`` response carries one
+        ``PRICE_CLASS_DOMAIN_<TLD>_<TYPE>`` relation per price component,
+        paired with its value in the ``RELATION VALUE`` list.
+        """
+        types = self._extract_property_values(result, 'RELATION TYPE', 'RELATIONTYPE')
+        values = self._extract_property_values(result, 'RELATION VALUE', 'RELATIONVALUE')
+        prices = {}
+        for i, rel_type in enumerate(types):
+            rel_type = str(rel_type).strip().upper()
+            if not rel_type.startswith(self.PRICE_RELATION_PREFIX):
+                continue
+            raw = rel_type[len(self.PRICE_RELATION_PREFIX):]  # e.g. COM_ANNUAL
+            parts = raw.rsplit('_', 1)
+            if len(parts) != 2:
+                continue
+            tld = parts[0].lower()
+            kind = parts[1].lower()
+            value = values[i] if i < len(values) else ''
+            entry = prices.setdefault(tld, {})
+            if kind == 'currency':
+                entry['currency'] = value
+            else:
+                try:
+                    entry[kind] = float(value)
+                except (TypeError, ValueError):
+                    entry[kind] = 0.0
+        return prices
+
+    def sync_prices(self):
+        """Pull per-TLD prices from ``statusUser`` and update ``domain.tld`` records.
+
+        Registration price = SETUP + ANNUAL, renewal = ANNUAL, transfer = TRANSFER.
+        Only the ``domain.tld`` cost reference is updated; Odoo sale prices and
+        pricelists are left untouched so they remain fully user-managed.
+        """
+        client = self._get_client()
+        result = client.status_user()
+        parsed = self._parse_price_relations(result)
+        if not parsed:
+            _logger.info('Domainrobot price sync: no PRICE_CLASS_* relations found.')
+            return {}
+
+        DomainTld = self.env['domain.tld']
+        company_currency = self.env.company.currency_id
+        updated = {}
+        for tld, data in parsed.items():
+            annual = float(data.get('annual', 0.0) or 0.0)
+            setup = float(data.get('setup', 0.0) or 0.0)
+            transfer = float(data.get('transfer', 0.0) or 0.0)
+            currency_code = str(data.get('currency', '')).upper()
+            currency = self.env['res.currency'].search([('name', '=', currency_code)], limit=1)
+            vals = {
+                'register_price': setup + annual,
+                'renew_price': annual,
+                'transfer_price': transfer,
+                'currency_id': currency.id if currency else company_currency.id,
+            }
+            rec = DomainTld.search([('name', '=', tld)], limit=1)
+            if rec:
+                rec.with_context(skip_domainrobot_sync=True).write(vals)
+            else:
+                rec = DomainTld.with_context(skip_domainrobot_sync=True).create({'name': tld, **vals})
+            updated[tld] = rec
+        return updated
 
     def sync_all(self):
         """Run the complete Domainrobot sync set in a predictable order."""

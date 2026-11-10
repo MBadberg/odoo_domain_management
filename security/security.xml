@@ -34,6 +34,18 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
+        <!-- Portal users can only see their own domain transfers -->
+        <record id="rule_domain_transfer_portal" model="ir.rule">
+            <field name="name">Domain Transfer: Portal users see only their own</field>
+            <field name="model_id" ref="model_domain_transfer"/>
+            <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
         <!-- Internal users see all records (no restriction needed beyond model access) -->
 
     </data>

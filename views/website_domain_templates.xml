@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ /domains als echte website.page (veröffentlichbar, editierbar) ═══ -->
+    <record id="domain_page_view" model="ir.ui.view">
+        <field name="name">Domains</field>
+        <field name="type">qweb</field>
+        <field name="key">odoo_domain_management.domain_page</field>
+        <field name="arch" type="xml">
+            <t t-name="odoo_domain_management.domain_page">
+                <t t-call="website.layout">
+                    <div id="wrap" class="oe_structure oe_empty">
+
+                        <!-- Block 1: Hero -->
+                        <section class="s_text_block pt48 pb48 o_colored_level bg-primary text-center"
+                                 data-snippet="s_text_block" data-name="Hero">
+                            <div class="container">
+                                <h1 class="display-4 fw-bold">Finde deine perfekte Domain</h1>
+                                <p class="lead">Registriere .de, .com, .net und mehr — direkt in deinem Shop.</p>
+                            </div>
+                        </section>
+
+                        <!-- Block 2: Features -->
+                        <section class="s_three_columns o_cc o_cc2 pt32 pb32 o_colored_level"
+                                 data-snippet="s_three_columns" data-name="Features">
+                            <div class="container">
+                                <div class="row d-flex align-items-stretch">
+                                    <div class="col-lg-4 pt16 pb16">
+                                        <div class="s_card card h-100 o_cc o_cc1 my-0" data-snippet="s_card" data-name="Feature">
+                                            <div class="card-body">
+                                                <h2 class="card-title h5-fs">Sofort verfügbar</h2>
+                                                <p class="card-text">Echtzeit-Verfügbarkeitsprüfung über die Domainrobot API.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 pt16 pb16">
+                                        <div class="s_card card h-100 o_cc o_cc1 my-0" data-snippet="s_card" data-name="Feature">
+                                            <div class="card-body">
+                                                <h2 class="card-title h5-fs">Transparente Preise</h2>
+                                                <p class="card-text">Preise je TLD, verwaltet über Odoo-Preislisten.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 pt16 pb16">
+                                        <div class="s_card card h-100 o_cc o_cc1 my-0" data-snippet="s_card" data-name="Feature">
+                                            <div class="card-body">
+                                                <h2 class="card-title h5-fs">Verwaltung im Portal</h2>
+                                                <p class="card-text">Kunden verwalten ihre Domains im Odoo-Portal.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Block 3: Überschrift Domain-Suche -->
+                        <section class="s_text_block pt32 pb16 text-center"
+                                 data-snippet="s_text_block" data-name="Search Title">
+                            <div class="container">
+                                <h2 class="mb-0">Domain suchen</h2>
+                            </div>
+                        </section>
+
+                        <!-- Block 4: Domain-Suche -->
+                        <section class="s_domain_search pb32"
+                                 data-snippet="s_domain_search" data-name="Domain Search">
+                            <div class="container">
+                                <form class="js_domain_search_form row g-2 justify-content-center"
+                                      data-action="/domains/search" role="search">
+                                    <div class="col-md-6">
+                                        <label for="domain_search" class="visually-hidden">Domainname</label>
+                                        <input id="domain_search" type="text" name="domain_name"
+                                               class="form-control form-control-lg" placeholder="deine-domain"/>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="submit" class="btn btn-primary btn-lg">Suchen</button>
+                                    </div>
+                                </form>
+                                <div class="js_domain_search_results mt-4"></div>
+                            </div>
+                        </section>
+
+                        <!-- Block 5: Überschrift Preise -->
+                        <section class="s_text_block pt32 pb16 text-center"
+                                 data-snippet="s_text_block" data-name="Pricing Title">
+                            <div class="container">
+                                <h2 class="mb-0">Preise</h2>
+                            </div>
+                        </section>
+
+                        <!-- Block 6: Preis-Tabelle -->
+                        <section class="s_domain_pricing pb48"
+                                 data-snippet="s_domain_pricing" data-name="Pricing">
+                            <div class="container">
+                                <div class="js_domain_pricing row g-3 justify-content-center"></div>
+                            </div>
+                        </section>
+
+                    </div>
+                </t>
+            </t>
+        </field>
+    </record>
+
+    <record id="domain_page" model="website.page">
+        <field name="url">/domains</field>
+        <field name="view_id" ref="domain_page_view"/>
+        <field name="website_meta_description">Domains registrieren und verwalten</field>
+    </record>
+
+    <!-- ══ AJAX-Ergebnis-Templates (dynamischer Inhalt der Blöcke) ══════════ -->
+    <template id="domain_search_results" name="Domain Search Results">
+        <t t-if="error">
+            <div class="alert alert-warning" role="alert"><t t-esc="error"/></div>
+        </t>
+        <t t-if="results">
+            <div class="row g-3">
+                <t t-foreach="results" t-as="result">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><t t-esc="result['domain']"/></h5>
+                                <p class="card-text text-muted">
+                                    <t t-if="result['tld'].register_price">
+                                        <strong><t t-esc="'%.2f' % result['tld'].register_price"/><t t-esc="result['tld'].currency_id.symbol"/></strong>/Jahr
+                                    </t>
+                                </p>
+                                <t t-if="result['available']">
+                                    <form method="POST" action="/domain/cart/add">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <input type="hidden" name="domain_name" t-att-value="result['domain']"/>
+                                        <button type="submit" class="btn btn-primary w-100">In den Warenkorb</button>
+                                    </form>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge bg-secondary">Nicht verfügbar</span>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <template id="domain_pricing_results" name="Domain Pricing Results">
+        <t t-foreach="tlds" t-as="tld">
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-0">.<t t-esc="tld.name"/></h5>
+                        <p class="card-text text-muted mb-0">
+                            <t t-if="tld.register_price"><t t-esc="'%.2f' % tld.register_price"/><t t-esc="tld.currency_id.symbol"/>/Jahr</t>
+                            <t t-else="">auf Anfrage</t>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ══ Snippet-Vorlagen für die Baustein-Palette ════════════════════════ -->
+    <template id="s_domain_search" name="Domain Search">
+        <section class="s_domain_search pt32 pb32" data-snippet="s_domain_search">
+            <div class="container">
+                <form class="js_domain_search_form row g-2 justify-content-center" data-action="/domains/search">
+                    <div class="col-md-6">
+                        <input type="text" name="domain_name" class="form-control form-control-lg" placeholder="deine-domain"/>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary btn-lg">Suchen</button>
+                    </div>
+                </form>
+                <div class="js_domain_search_results mt-4"></div>
+            </div>
+        </section>
+    </template>
+
+    <template id="s_domain_pricing" name="Domain Pricing">
+        <section class="s_domain_pricing pt32 pb48" data-snippet="s_domain_pricing">
+            <div class="container">
+                <div class="js_domain_pricing row g-3 justify-content-center"></div>
+            </div>
+        </section>
+    </template>
+
+    <template id="snippets_domain_group" inherit_id="website.snippets" priority="60">
+        <xpath expr="//t[@id='installed_snippets_hook']" position="before">
+            <t snippet-group="domains" t-snippet="website.s_snippet_group" string="Domains"
+               t-thumbnail="/website/static/src/img/snippets_thumbs/s_text_image.svg"/>
+        </xpath>
+    </template>
+
+    <template id="snippets_domain_entries" inherit_id="website.snippets" priority="60">
+        <xpath expr="//snippets[@id='snippet_structure']" position="inside">
+            <t t-snippet="odoo_domain_management.s_domain_search" string="Domain Search" group="domains"/>
+            <t t-snippet="odoo_domain_management.s_domain_pricing" string="Domain Pricing" group="domains"/>
+        </xpath>
+    </template>
+
+    <!-- Menüpunkt -->
+    <record id="menu_domains_website" model="website.menu">
+        <field name="name">Domains</field>
+        <field name="url">/domains</field>
+        <field name="sequence">20</field>
+    </record>
+</odoo>

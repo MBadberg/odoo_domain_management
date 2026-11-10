@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -154,6 +155,20 @@ class DomainAsset(models.Model):
 
     def action_sync_domainrobot(self):
         return self.action_sync_status()
+
+    def action_renew(self, period=1):
+        """Renew this domain at the registry for *period* years."""
+        self.ensure_one()
+        period = int(period or 1)
+        client = self._get_client()
+        result = client.renew_domain(self.name, period=f'{period}Y')
+        code = result.get('code')
+        if code != '200':
+            raise UserError(_('Renewal failed – API code %s: %s') % (code, result.get('description', '')))
+        self.message_post(body=_('Domain renewed for %d year(s).') % period)
+        # Best-effort refresh of expiry/status from the registry.
+        self.action_sync_status()
+        return True
 
     def _get_client(self):
         from odoo.addons.odoo_domain_management.services.domainrobot_client import DomainrobotClient

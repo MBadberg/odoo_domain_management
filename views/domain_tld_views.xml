@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_domain_tld" model="ir.actions.act_window">
+        <field name="name">TLDs &amp; Pricing</field>
+        <field name="res_model">domain.tld</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_domain_tld_list" model="ir.ui.view">
+        <field name="name">domain.tld.list</field>
+        <field name="model">domain.tld</field>
+        <field name="arch" type="xml">
+            <list string="Domain TLDs">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="register_price"/>
+                <field name="renew_price"/>
+                <field name="transfer_price"/>
+                <field name="markup_percent"/>
+                <field name="currency_id" optional="hide"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_domain_tld_form" model="ir.ui.view">
+        <field name="name">domain.tld.form</field>
+        <field name="model">domain.tld</field>
+        <field name="arch" type="xml">
+            <form string="Domain TLD">
+                <header>
+                    <button name="action_sync_prices" type="object"
+                            string="Sync Prices from API" class="btn-secondary"/>
+                    <button name="action_apply_markup_to_products" type="object"
+                            string="Apply Markup to Products" class="btn-secondary"/>
+                    <button name="action_seed_tlds" type="object"
+                            string="Seed TLD Products" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="product_id"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="currency_id"/>
+                            <field name="sequence"/>
+                            <field name="registrar"/>
+                        </group>
+                    </group>
+                    <group string="Pricing">
+                        <group>
+                            <field name="register_price"/>
+                            <field name="renew_price"/>
+                            <field name="transfer_price"/>
+                            <field name="markup_percent"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_domain_tld_search" model="ir.ui.view">
+        <field name="name">domain.tld.search</field>
+        <field name="model">domain.tld</field>
+        <field name="arch" type="xml">
+            <search string="Search TLDs">
+                <field name="name"/>
+                <field name="product_id"/>
+                <filter name="active_tlds" string="Active" domain="[('active', '=', True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <menuitem id="menu_domain_tld" name="TLDs &amp; Pricing"
+              parent="menu_domain_root"
+              action="action_domain_tld"
+              sequence="15"/>
+
+</odoo>
