@@ -78,6 +78,9 @@
                        decoration-success="state == 'registered'"
                        decoration-warning="state == 'pending'"
                        decoration-danger="state == 'failed'"/>
+                <field name="product_id"/>
+                <field name="price_unit"/>
+                <field name="sale_order_id"/>
                 <field name="date_order"/>
                 <field name="date_registered"/>
             </list>
@@ -129,6 +132,16 @@
                             <field name="partner_id"/>
                             <field name="user_id"/>
                             <field name="asset_id"/>
+                        </group>
+                    </group>
+                    <group string="Shop">
+                        <group>
+                            <field name="sale_order_id"/>
+                            <field name="product_id"/>
+                        </group>
+                        <group>
+                            <field name="price_unit"/>
+                            <field name="currency_id"/>
                         </group>
                     </group>
                     <separator string="Nameservers"/>

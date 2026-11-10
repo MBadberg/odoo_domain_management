@@ -7,3 +7,6 @@ from . import domain_api_test
 from . import domain_overview
 from . import res_partner
 from . import res_config_settings
+from . import domain_tld
+from . import sale_order
+from . import payment_transaction

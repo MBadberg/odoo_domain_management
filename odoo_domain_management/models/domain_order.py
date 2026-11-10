@@ -114,6 +114,31 @@ class DomainOrder(models.Model):
         readonly=True,
     )
 
+    # ── Shop integration (sale order link) ───────────────────────────────────
+
+    sale_order_id = fields.Many2one(
+        'sale.order',
+        string='Sale Order',
+        ondelete='set null',
+        tracking=True,
+        index=True,
+        help='Sales order (cart/checkout) that initiated this domain order.',
+    )
+    product_id = fields.Many2one(
+        'product.product',
+        string='Product',
+        ondelete='set null',
+        help='Product variant (TLD) sold for this domain.',
+    )
+    price_unit = fields.Monetary(
+        string='Unit Price',
+        currency_field='currency_id',
+    )
+    currency_id = fields.Many2one(
+        'res.currency',
+        string='Currency',
+    )
+
     # ── Timestamps ───────────────────────────────────────────────────────────
 
     date_order = fields.Datetime(string='Order Date', default=fields.Datetime.now)
@@ -231,6 +256,28 @@ class DomainOrder(models.Model):
     def action_cancel(self):
         self.write({'state': 'cancelled'})
 
+    def _auto_register(self):
+        """Check availability and register the domain (automated payment flow)."""
+        self.ensure_one()
+        if self.state == 'registered':
+            return True
+        if self.availability != 'available':
+            self.action_check_availability()
+        if self.availability != 'available':
+            raise UserError(_('Domain "%s" is not available.') % self.name)
+        return self.action_purchase()
+
+    def _try_auto_register(self):
+        """Run :meth:`_auto_register` and mark the order failed on error."""
+        self.ensure_one()
+        try:
+            return self._auto_register()
+        except Exception as exc:  # pylint: disable=broad-except
+            _logger.exception('Automatic registration failed for %s', self.name)
+            self.write({'state': 'failed', 'api_response_message': str(exc)})
+            self.message_post(body=_('Automatic registration failed: %s') % exc)
+            return False
+
     # ── Helpers ───────────────────────────────────────────────────────────────
 
     def _get_client(self):
@@ -255,7 +302,7 @@ class DomainOrder(models.Model):
             'user_id': self.user_id.id,
             'status': 'active',
             'order_id': self.id,
-            'external_domain_id': external_domain_id or asset.external_domain_id if asset else False,
+            'external_domain_id': (external_domain_id or asset.external_domain_id) if asset else False,
             'sync_state': 'synced',
             'needs_sync': False,
         }

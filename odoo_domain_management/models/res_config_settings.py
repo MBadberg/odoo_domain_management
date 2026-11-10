@@ -39,10 +39,17 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='domainrobot.api_timeout',
         help='HTTP request timeout in seconds.',
     )
+    domainrobot_markup_percent = fields.Float(
+        string='Default Markup (%)',
+        default=0.0,
+        config_parameter='domainrobot.markup_percent',
+        help='Global markup applied on the Domainrobot cost to compute the sale price. '
+             'A per-TLD value in "Domains → TLDs & Pricing" overrides this.',
+    )
 
     # ── Update configuration fields ───────────────────────────────────────────
 
-    module_version = fields.Char(
+    installed_version = fields.Char(
         string='Installed version',
         readonly=True,
         default=lambda self: self._get_current_module_version(),
@@ -173,7 +180,7 @@ class ResConfigSettings(models.TransientModel):
         self.github_latest_version = latest_version
         self.github_update_available = self._is_newer_version(latest_version, self._get_current_module_version())
         self.github_last_check = fields.Datetime.now()
-        self.module_version = self._get_current_module_version()
+        self.installed_version = self._get_current_module_version()
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'res.config.settings',
@@ -200,7 +207,7 @@ class ResConfigSettings(models.TransientModel):
         self._run_git_command(['fetch', '--all', '--tags'])
         self._run_git_command(['pull', '--ff-only', 'origin', branch])
         self.env['ir.module.module'].search([('name', '=', 'odoo_domain_management')]).button_immediate_upgrade()
-        self.module_version = self._get_current_module_version()
+        self.installed_version = self._get_current_module_version()
         self.github_latest_version = self._fetch_latest_github_version()[0]
         self.github_update_available = False
         self.github_last_check = fields.Datetime.now()

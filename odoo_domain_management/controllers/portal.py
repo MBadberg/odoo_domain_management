@@ -91,7 +91,12 @@ class DomainPortalController(CustomerPortal):
         domain = self._get_domain_asset_or_raise(domain_id)
         return request.render(
             'odoo_domain_management.portal_domain_detail',
-            {'domain': domain, 'page_name': 'domain'},
+            {
+                'domain': domain,
+                'page_name': 'domain',
+                'renew_error': None,
+                'renew_success': None,
+            },
         )
 
     # ── Availability check ────────────────────────────────────────────────────
@@ -241,6 +246,117 @@ class DomainPortalController(CustomerPortal):
                 'success': success,
             },
         )
+
+    # ── Contact handle ────────────────────────────────────────────────────────
+
+    @http.route('/my/domains/contact', type='http', auth='user', website=True, methods=['GET'])
+    def portal_contact_form(self, **kw):
+        """Show the contact-handle status and creation form."""
+        partner = self._get_portal_partner()
+        return request.render('odoo_domain_management.portal_domain_contact', {
+            'page_name': 'domain',
+            'partner': partner,
+            'message': None,
+            'error': None,
+        })
+
+    @http.route('/my/domains/contact', type='http', auth='user', website=True, methods=['POST'])
+    def portal_contact_submit(self, **kw):
+        """Create or update the user's Domainrobot contact handle."""
+        partner = self._get_portal_partner()
+        message = None
+        error = None
+        if not partner:
+            error = _('You must be linked to a partner account.')
+        else:
+            try:
+                handle = partner._sync_single_contact_handle()
+                if handle:
+                    message = _('Contact handle created/updated: %s') % handle
+                else:
+                    error = partner.sync_error or _('Could not create the contact handle.')
+            except Exception as exc:  # pylint: disable=broad-except
+                _logger.error('Contact handle sync failed: %s', exc)
+                error = _('An unexpected error occurred. Please contact support.')
+        return request.render('odoo_domain_management.portal_domain_contact', {
+            'page_name': 'domain',
+            'partner': partner,
+            'message': message,
+            'error': error,
+        })
+
+    # ── Renewal ───────────────────────────────────────────────────────────────
+
+    @http.route('/my/domains/<int:domain_id>/renew', type='http', auth='user', website=True, methods=['POST'])
+    def portal_renew_domain(self, domain_id, years=1, **kw):
+        """Add a domain renewal to the cart (billed via the shop, renewed after payment)."""
+        domain = self._get_domain_asset_or_raise(domain_id)
+        tld = request.env['domain.tld'].sudo()._get_for_domain(domain.name)
+        product = tld.product_id
+        if not product:
+            raise UserError(_('Renewal is not available for this domain extension yet.'))
+        order = request.website._get_and_cache_current_cart()
+        if not order:
+            order = request.website._create_cart()
+        line = order._add_domain_line(product, domain.name, 'renew')
+        line.product_uom_qty = int(years or 1)
+        return request.redirect('/shop/cart')
+
+    # ── Transfer ──────────────────────────────────────────────────────────────
+
+    @http.route('/my/domains/transfer', type='http', auth='user', website=True, methods=['GET'])
+    def portal_transfer_form(self, **kw):
+        """Show the transfer request form and the user's transfer list."""
+        partner = self._get_portal_partner()
+        transfers = (
+            request.env['domain.transfer'].search(
+                [('partner_id', '=', partner.id)], order='create_date desc')
+            if partner else request.env['domain.transfer'].browse()
+        )
+        return request.render('odoo_domain_management.portal_domain_transfer', {
+            'page_name': 'domain',
+            'transfers': transfers,
+            'error': None,
+            'success': None,
+        })
+
+    @http.route('/my/domains/transfer', type='http', auth='user', website=True, methods=['POST'])
+    def portal_transfer_submit(self, domain_name='', authcode='', **kw):
+        """Request an incoming domain transfer."""
+        partner = self._get_portal_partner()
+        domain_name = (domain_name or '').strip().lower()
+        error = None
+        success = None
+        if not partner:
+            error = _('You must be linked to a partner account.')
+        elif not domain_name:
+            error = _('Please enter a domain name.')
+        else:
+            try:
+                transfer = request.env['domain.transfer'].sudo().create({
+                    'name': domain_name,
+                    'partner_id': partner.id,
+                    'transfer_type': 'incoming',
+                    'status': 'requested',
+                })
+                transfer.action_request_transfer(authcode)
+                success = _('Transfer requested for %s. You will receive a confirmation e-mail.') % domain_name
+            except UserError as exc:
+                error = str(exc)
+            except Exception as exc:  # pylint: disable=broad-except
+                _logger.error('Transfer request failed: %s', exc)
+                error = _('An unexpected error occurred. Please contact support.')
+        transfers = (
+            request.env['domain.transfer'].search(
+                [('partner_id', '=', partner.id)], order='create_date desc')
+            if partner else request.env['domain.transfer'].browse()
+        )
+        return request.render('odoo_domain_management.portal_domain_transfer', {
+            'page_name': 'domain',
+            'transfers': transfers,
+            'error': error,
+            'success': success,
+        })
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 

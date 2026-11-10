@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Idempotent seeding of TLDs, attribute values and product variants.
+         Runs on install AND upgrade (data files are re-processed on upgrade). -->
+    <function model="domain.tld" name="_seed_default_tlds"/>
+
+</odoo>

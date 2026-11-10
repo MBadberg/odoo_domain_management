@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__version__ = '19.0.1.1.0'
+__version__ = '19.0.2.2.0'
 
 from . import models
 from . import services
