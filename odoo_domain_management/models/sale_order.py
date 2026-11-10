@@ -65,25 +65,23 @@ class SaleOrder(models.Model):
         if existing:
             existing[0].product_uom_qty += 1
             return existing[0]
-        if price_unit is not None:
-            price = price_unit
-        else:
-            # ``sale.order`` has no price computation of its own. Use the
-            # order's pricelist directly (same rules as the standard cart).
-            price = self.pricelist_id._get_product_price(product, 1.0, self.partner_id)
         taxes = product.taxes_id.filtered(
             lambda tax: tax.company_id in (False, self.company_id))
-        return self.env['sale.order.line'].sudo().create({
+        vals = {
             'order_id': self.id,
             'product_id': product.id,
             'name': domain_name,
             'product_uom_qty': 1.0,
             'product_uom': product.uom_id.id,
-            'price_unit': price,
             'tax_id': [(6, 0, taxes.ids)],
             'domain_name': domain_name,
             'domain_operation': operation,
-        })
+        }
+        # When no explicit price is given, leave ``price_unit`` unset so Odoo
+        # computes it through the standard sale.order.line flow (pricelist).
+        if price_unit is not None:
+            vals['price_unit'] = price_unit
+        return self.env['sale.order.line'].sudo().create(vals)
 
     def _register_domains_after_payment(self):
         """Register/renew domains once the sale order has been paid."""
