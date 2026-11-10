@@ -68,14 +68,9 @@ class SaleOrder(models.Model):
         if price_unit is not None:
             price = price_unit
         else:
-            # ``_get_display_price`` lives on ``sale.order.line`` (not on
-            # ``sale.order``). Compute it through a transient line so the
-            # pricelist / discount rules apply exactly as in the standard cart.
-            price = self.env['sale.order.line'].new({
-                'order_id': self.id,
-                'product_id': product.id,
-                'product_uom_qty': 1.0,
-            })._get_display_price(product)
+            # ``sale.order`` has no price computation of its own. Use the
+            # order's pricelist directly (same rules as the standard cart).
+            price = self.pricelist_id._get_product_price(product, 1.0, self.partner_id)
         taxes = product.taxes_id.filtered(
             lambda tax: tax.company_id in (False, self.company_id))
         return self.env['sale.order.line'].sudo().create({
