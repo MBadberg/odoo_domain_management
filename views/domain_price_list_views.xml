@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_domain_price_list" model="ir.actions.act_window">
+        <field name="name">Price Lists</field>
+        <field name="res_model">domain.price.list</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_domain_price_list_list" model="ir.ui.view">
+        <field name="name">domain.price.list.list</field>
+        <field name="model">domain.price.list</field>
+        <field name="arch" type="xml">
+            <list string="Domain Price Lists">
+                <field name="name"/>
+                <field name="external_userclass"/>
+                <field name="is_default"/>
+                <field name="sequence"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_domain_price_list_form" model="ir.ui.view">
+        <field name="name">domain.price.list.form</field>
+        <field name="model">domain.price.list</field>
+        <field name="arch" type="xml">
+            <form string="Domain Price List">
+                <header>
+                    <button name="action_sync_prices" type="object"
+                            string="Sync Prices from API" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="external_userclass"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="is_default"/>
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                    <separator string="Prices"/>
+                    <field name="price_line_ids">
+                        <list editable="bottom">
+                            <field name="tld"/>
+                            <field name="register_price"/>
+                            <field name="renew_price"/>
+                            <field name="transfer_price"/>
+                            <field name="currency_id" optional="hide"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_domain_price_list" name="Price Lists"
+              parent="menu_domain_root"
+              action="action_domain_price_list"
+              sequence="20"/>
+
+</odoo>

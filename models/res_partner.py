@@ -25,6 +25,13 @@ class ResPartner(models.Model):
     )
     sync_error = fields.Text(string='Sync Error', copy=False)
     needs_sync = fields.Boolean(string='Needs Sync', default=False, index=True, copy=False)
+    domain_price_list_id = fields.Many2one(
+        'domain.price.list',
+        string='Domain Price List',
+        index=True,
+        help='Domainrobot price list (UserClass) used for this customer. '
+             'Overrides the default TLD prices.',
+    )
 
     def _sync_single_contact_handle(self):
         self.ensure_one()

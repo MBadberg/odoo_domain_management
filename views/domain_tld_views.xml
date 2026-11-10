@@ -32,6 +32,8 @@
                 <header>
                     <button name="action_sync_prices" type="object"
                             string="Sync Prices from API" class="btn-secondary"/>
+                    <button name="action_sync_price_lists" type="object"
+                            string="Sync Price Lists" class="btn-secondary"/>
                     <button name="action_apply_markup_to_products" type="object"
                             string="Apply Markup to Products" class="btn-secondary"/>
                     <button name="action_seed_tlds" type="object"

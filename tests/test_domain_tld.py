@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo.tests import common, tagged
+from unittest.mock import patch
 
 
 @tagged('post_install', '-at_install')
@@ -84,3 +85,51 @@ class TestDomainTld(common.TransactionCase):
         self.tld_de.markup_percent = 25.0
         self.assertEqual(self.tld_de._get_markup_percent(), 25.0)
         self.assertEqual(self.tld_de._compute_sell_price(10.0), 12.5)
+
+    def test_ensure_product_variants(self):
+        """A TLD without a product must become sellable via _ensure_product_variants."""
+        self.env['domain.tld'].create({'name': 'xyz'})
+        self.env['domain.tld']._ensure_product_variants(['xyz'])
+
+        tld = self.env['domain.tld'].search([('name', '=', 'xyz')])
+        self.assertTrue(tld.product_id)
+        self.assertEqual(tld.product_id.product_tmpl_id.name, 'Domain')
+
+        # Idempotent: running again must not duplicate the variant.
+        variant_count = self.env['product.product'].search_count([
+            ('product_tmpl_id.name', '=', 'Domain'),
+        ])
+        self.env['domain.tld']._ensure_product_variants(['xyz'])
+        self.assertEqual(
+            self.env['product.product'].search_count([
+                ('product_tmpl_id.name', '=', 'Domain'),
+            ]),
+            variant_count,
+        )
+
+    def test_sync_prices_creates_variants(self):
+        """Price sync must create the missing product variant for a new TLD."""
+        from odoo.addons.odoo_domain_management.services.domainrobot_sync import DomainrobotSyncService
+        result = {
+            'code': '200',
+            'properties': {
+                'RELATION TYPE': [
+                    'PRICE_CLASS_DOMAIN_XYZ_ANNUAL',
+                    'PRICE_CLASS_DOMAIN_XYZ_CURRENCY',
+                    'PRICE_CLASS_DOMAIN_XYZ_SETUP',
+                    'PRICE_CLASS_DOMAIN_XYZ_TRANSFER',
+                ],
+                'RELATION VALUE': ['6.00', 'EUR', '3.00', '6.00'],
+            },
+        }
+        fake = type('FakeClient', (), {'status_user': lambda self: result})()
+        with patch(
+                'odoo.addons.odoo_domain_management.services.domainrobot_client.DomainrobotClient.from_system_params',
+                return_value=fake):
+            service = DomainrobotSyncService(self.env)
+            updated = service.sync_prices()
+
+        self.assertIn('xyz', updated)
+        tld = self.env['domain.tld'].search([('name', '=', 'xyz')])
+        self.assertTrue(tld.product_id)
+        self.assertAlmostEqual(tld.register_price, 9.0)

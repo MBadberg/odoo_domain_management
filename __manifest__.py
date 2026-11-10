@@ -44,6 +44,8 @@ Features (MVP):
         'views/res_config_settings_views.xml',
         'views/portal_templates.xml',
         'views/domain_tld_views.xml',
+        'views/domain_price_list_views.xml',
+        'views/res_partner_views.xml',
         'views/website_domain_templates.xml',
     ],
     'assets': {

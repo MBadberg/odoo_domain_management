@@ -89,6 +89,56 @@ class DomainTld(models.Model):
         Idempotent and non-destructive: existing records (and their prices)
         are left untouched, so it is safe to run on every install/upgrade.
         """
+        company_currency = self.env.company.currency_id
+        attribute = self.env['product.attribute'].search([('name', '=', 'TLD')], limit=1)
+        if not attribute:
+            attribute = self.env['product.attribute'].create({
+                'name': 'TLD',
+                'create_variant': 'always',
+                'display_type': 'select',
+            })
+
+        tld_names = []
+        for tld, register, renew, transfer in self.DEFAULT_TLDS:
+            tld_names.append(tld)
+            value = self.env['product.attribute.value'].search([
+                ('attribute_id', '=', attribute.id),
+                ('name', '=', tld),
+            ], limit=1)
+            if not value:
+                value = self.env['product.attribute.value'].create({
+                    'attribute_id': attribute.id,
+                    'name': tld,
+                    'default_extra_price': register,
+                })
+
+            rec = self.search([('name', '=', tld)], limit=1)
+            if not rec:
+                self.create({
+                    'name': tld,
+                    'register_price': register,
+                    'renew_price': renew,
+                    'transfer_price': transfer,
+                    'currency_id': company_currency.id,
+                })
+
+        self._ensure_product_variants(tld_names)
+        return True
+
+    @api.model
+    def _ensure_product_variants(self, tlds):
+        """Ensure a sellable product variant exists for every given TLD.
+
+        Creates the shared ``Domain`` product template, the ``TLD`` attribute
+        and one attribute value + variant per TLD, then links each variant back
+        to its ``domain.tld`` record. Prices are left untouched. Idempotent:
+        calling it again with the same (or overlapping) TLDs never duplicates
+        records, so it is safe to run after every price sync.
+        """
+        tlds = [str(t).strip().lower() for t in tlds if str(t).strip()]
+        if not tlds:
+            return True
+
         category = self.env['product.category'].search([('name', '=', 'Domains')], limit=1)
         if not category:
             category = self.env['product.category'].create({'name': 'Domains'})
@@ -116,10 +166,8 @@ class DomainTld(models.Model):
                 'description': 'Domain registration via Domainrobot (united-domains Reselling)',
             })
 
-        company_currency = self.env.company.currency_id
-
         value_ids = []
-        for tld, register, renew, transfer in self.DEFAULT_TLDS:
+        for tld in tlds:
             value = self.env['product.attribute.value'].search([
                 ('attribute_id', '=', attribute.id),
                 ('name', '=', tld),
@@ -128,19 +176,8 @@ class DomainTld(models.Model):
                 value = self.env['product.attribute.value'].create({
                     'attribute_id': attribute.id,
                     'name': tld,
-                    'default_extra_price': register,
                 })
             value_ids.append(value.id)
-
-            rec = self.search([('name', '=', tld)], limit=1)
-            if not rec:
-                self.create({
-                    'name': tld,
-                    'register_price': register,
-                    'renew_price': renew,
-                    'transfer_price': transfer,
-                    'currency_id': company_currency.id,
-                })
 
         line = self.env['product.template.attribute.line'].search([
             ('product_tmpl_id', '=', template.id),
@@ -157,7 +194,7 @@ class DomainTld(models.Model):
             if missing:
                 line.write({'value_ids': [(4, v) for v in missing]})
 
-        for tld, _register, _renew, _transfer in self.DEFAULT_TLDS:
+        for tld in tlds:
             value = self.env['product.attribute.value'].search([
                 ('attribute_id', '=', attribute.id),
                 ('name', '=', tld),
@@ -198,6 +235,25 @@ class DomainTld(models.Model):
         """Return *cost* + markup as the sale price (rounded to 2 decimals)."""
         self.ensure_one()
         return round((cost or 0.0) * (1.0 + self._get_markup_percent() / 100.0), 2)
+
+    def _effective_prices(self, partner=None):
+        """Return ``(register, renew, transfer)`` effective for *partner*.
+
+        Falls back to this TLD's own prices when the partner has no price
+        list assigned (or the list has no line for this TLD).
+        """
+        self.ensure_one()
+        price_list = partner.domain_price_list_id if partner else False
+        if price_list:
+            line = self.env['domain.price.line']._get_for(price_list, self.name)
+            if line:
+                return line.register_price, line.renew_price, line.transfer_price
+        return self.register_price, self.renew_price, self.transfer_price
+
+    def _sell_price_for_partner(self, partner=None):
+        """Return the sell price (cost + markup) effective for *partner*."""
+        register, _renew, _transfer = self._effective_prices(partner)
+        return self._compute_sell_price(register)
 
     def _set_product_price(self, price):
         """Write *price* onto the linked product variant's TLD attribute value."""
@@ -250,6 +306,21 @@ class DomainTld(models.Model):
                 'title': _('Price sync'),
                 'message': _('%d TLD prices updated and markup applied.') % len(updated),
                 'type': 'success' if updated else 'warning',
+                'sticky': False,
+            },
+        }
+
+    def action_sync_price_lists(self):
+        """Sync all Domainrobot price lists (UserClasses) and their prices."""
+        from odoo.addons.odoo_domain_management.services.domainrobot_sync import DomainrobotSyncService
+        lists = DomainrobotSyncService(self.env).sync_all_price_lists()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Price list sync'),
+                'message': _('%d price list(s) synced.') % len(lists),
+                'type': 'success' if lists else 'warning',
                 'sticky': False,
             },
         }

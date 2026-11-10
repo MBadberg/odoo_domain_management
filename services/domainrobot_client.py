@@ -259,6 +259,14 @@ class DomainrobotClient:
         """
         return self._call({'command': 'statusUser'})
 
+    def status_userclass(self, userclass: str) -> Dict[str, Any]:
+        """Query the relations (prices) of a specific Domainrobot UserClass."""
+        return self._call({'command': 'StatusUserclass', 'userclass': userclass})
+
+    def query_user_class_list(self) -> Dict[str, Any]:
+        """Return the names of all UserClasses of the current user."""
+        return self._call({'command': 'QueryUserClassList'})
+
     def modify_domain(self, domain: str, **kwargs) -> Dict[str, Any]:
         """Update contacts, nameservers or status flags on an existing domain."""
         cmd = {'command': 'ModifyDomain', 'domain': domain}

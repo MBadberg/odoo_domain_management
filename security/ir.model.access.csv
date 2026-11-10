@@ -11,3 +11,5 @@ access_domain_api_test_user,domain.api.test (internal user),model_domain_api_tes
 access_domain_tld_user,domain.tld (internal user),model_domain_tld,base.group_user,1,1,1,1
 access_domain_tld_portal,domain.tld (portal),model_domain_tld,base.group_portal,1,0,0,0
 access_domain_tld_public,domain.tld (public),model_domain_tld,base.group_public,1,0,0,0
+access_domain_price_list_user,domain.price.list (internal user),model_domain_price_list,base.group_user,1,1,1,1
+access_domain_price_line_user,domain.price.line (internal user),model_domain_price_line,base.group_user,1,1,1,1

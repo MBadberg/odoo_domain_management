@@ -481,7 +481,80 @@ class DomainrobotSyncService:
             else:
                 rec = DomainTld.with_context(skip_domainrobot_sync=True).create({'name': tld, **vals})
             updated[tld] = rec
+
+        # A TLD that only exists via price sync still needs a sellable product
+        # variant: create the missing variants and link them to their record.
+        if updated:
+            DomainTld._ensure_product_variants(list(updated.keys()))
+
         return updated
+
+    def sync_price_lists(self):
+        """Pull Domainrobot UserClasses and upsert ``domain.price.list`` records."""
+        client = self._get_client()
+        result = client.query_user_class_list()
+        names = self._extract_property_values(result, 'USERCLASS', 'USERCLASSLIST', 'USER_CLASS')
+        if not names:
+            _logger.info('Domainrobot price list sync: no UserClasses found.')
+            return []
+        PriceList = self.env['domain.price.list']
+        synced = []
+        for name in names:
+            name = str(name).strip()
+            if not name:
+                continue
+            rec = PriceList.search([('external_userclass', '=', name)], limit=1)
+            if not rec:
+                rec = PriceList.search([('name', '=', name)], limit=1)
+            if rec:
+                rec.write({'external_userclass': name})
+            else:
+                rec = PriceList.create({'name': name, 'external_userclass': name})
+            synced.append(rec)
+        return synced
+
+    def _sync_price_list_prices(self, price_list):
+        """Sync the per-TLD prices of one ``domain.price.list`` from Domainrobot."""
+        client = self._get_client()
+        result = client.status_userclass(price_list.external_userclass or price_list.name)
+        parsed = self._parse_price_relations(result)
+        if not parsed:
+            return {}
+        PriceLine = self.env['domain.price.line']
+        company_currency = self.env.company.currency_id
+        updated = {}
+        for tld, data in parsed.items():
+            annual = float(data.get('annual', 0.0) or 0.0)
+            setup = float(data.get('setup', 0.0) or 0.0)
+            transfer = float(data.get('transfer', 0.0) or 0.0)
+            currency_code = str(data.get('currency', '')).upper()
+            currency = self.env['res.currency'].search([('name', '=', currency_code)], limit=1)
+            vals = {
+                'register_price': setup + annual,
+                'renew_price': annual,
+                'transfer_price': transfer,
+                'currency_id': currency.id if currency else company_currency.id,
+            }
+            line = PriceLine.search([
+                ('price_list_id', '=', price_list.id),
+                ('tld', '=', tld),
+            ], limit=1)
+            if line:
+                line.write(vals)
+            else:
+                line = PriceLine.create({'price_list_id': price_list.id, 'tld': tld, **vals})
+            updated[tld] = line
+        return updated
+
+    def sync_all_price_lists(self):
+        """Sync every Domainrobot price list and its per-TLD prices."""
+        lists = self.sync_price_lists()
+        for price_list in lists:
+            try:
+                self._sync_price_list_prices(price_list)
+            except Exception as exc:  # pragma: no cover - defensive runtime guard
+                _logger.exception('Domainrobot price list sync failed for %s: %s', price_list.name, exc)
+        return lists
 
     def sync_all(self):
         """Run the complete Domainrobot sync set in a predictable order."""

@@ -89,5 +89,9 @@ class DomainWebsiteController(http.Controller):
         order = request.website._get_and_cache_current_cart()
         if not order:
             order = request.website._create_cart()
-        order._add_domain_line(product, domain_name, 'register')
+        partner = request.env.user.partner_id
+        sell_price = None
+        if partner and partner.domain_price_list_id:
+            sell_price = tld._sell_price_for_partner(partner)
+        order._add_domain_line(product, domain_name, 'register', price_unit=sell_price)
         return request.redirect('/shop/cart')
